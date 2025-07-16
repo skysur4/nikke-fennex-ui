@@ -1,0 +1,57 @@
+.alert{
+  display:flex;
+  position:fixed;
+  z-index:9999;
+  bottom:30px;
+  left:0;
+  right:0;
+  margin:auto;
+  color: #000000;
+  background: deepskyblue;
+  max-width:700px;
+  min-height:50px;
+  align-items: center;
+  padding:10px 0 10px 30px;
+  border-radius: 5px;
+  transition: opacity 0.5s ease-in-out;
+  opacity: 0;
+  visibility: hidden;
+  white-space:pre-line;
+  svg{
+    margin-right: 20px;
+    color:#000000;
+  }
+
+  &.info {
+	color: #000000;
+	background: deepskyblue;
+	svg{
+      color: #000000;
+    }
+  }
+
+  &.warn {
+	color: #000000;
+	background: orange;
+	svg{
+      color: #000000;
+    }
+  }
+
+  &.error {
+	color: #ffffff;
+	background: red;
+	svg{
+      color: #ffffff;
+    }
+  }
+
+  &.visible{
+    opacity: 1;
+    visibility: visible;
+  }
+
+  @media screen and (max-width:900px){
+    max-width:90%;
+  }
+}

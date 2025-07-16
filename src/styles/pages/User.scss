@@ -1,0 +1,172 @@
+#userSection{
+  max-width:800px;
+  .section-header{
+    display:flex;
+    align-items: center;
+    justify-content: space-between;
+    padding:30px 0;
+    box-sizing: border-box;
+
+    h2{
+      font-size:28px;
+      font-weight: 700;
+    }
+
+    div{
+      a{
+        &:first-child{
+          margin-right: 20px;
+        }
+      }
+    }
+
+    border-bottom:1px solid #ccc;
+  }
+
+  .section-body{
+    box-sizing: border-box;
+    border-bottom:1px solid #ccc;
+    .img-form{
+      display:flex;
+      flex-direction: column;
+      img{
+        width:180px;
+        height:180px;
+        object-fit: cover;
+      }
+      .no-img{
+        width:180px;
+        height:180px;
+        //background:#F2F2F2;
+        //display:flex;
+        //justify-content: center;
+        //align-items: center;
+        //color:#CCC;
+        //border:1px solid #CCC;
+      }
+
+      button{
+        margin-top: 20px;
+        width:180px;
+        svg{
+          margin-right: 5px;
+          width:18px;
+        }
+      }
+    }
+    table{
+      tbody{
+        tr{
+          text-align: left;
+          th, td{
+            padding:10px 0 10px 40px;
+            box-sizing: border-box;
+            vertical-align: middle;
+          }
+
+          th{
+            min-width:180px;
+          }
+          td{
+            display:flex;
+            align-items: center;
+            font-weight: 300;
+            .MuiTextField-root, .MuiStack-root, .MuiInputBase-root{
+              width:100%;
+            }
+
+            .MuiRadioGroup-root{
+              flex-direction: row;
+            }
+
+            button{
+              &.pnvBtn{
+                margin-left: 10px;
+                height:56px;
+              }
+            }
+          }
+        }
+      }
+
+      &.editTable{
+        tbody{
+          tr{
+            th,td{
+              min-height:76px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+
+
+  @media screen and (max-width:900px){
+    max-width:90%;
+    .section-header{
+      h2{
+        font-size:18px;
+      }
+      div{
+        a{
+          &:first-child{
+            margin-right: 10px ;
+          }
+        }
+      }
+    }
+    .container-flex{
+      flex-direction: column;
+      align-items: center;
+      .MuiGrid-item{
+        max-width:100%;
+      }
+
+      .profile-form{
+        margin-top: 30px;
+        table{
+          tbody{
+            tr{
+              th, td{
+                padding:10px 0;
+                min-width:auto;
+              }
+
+              th{
+                min-width:130px;
+              }
+            }
+          }
+        }
+      }
+
+      .edit-form{
+        margin-top: 30px;
+        table{
+          tbody{
+            tr{
+              display:flex;
+              flex-direction: column;
+              th, td{
+                padding:0;
+                min-width:100%;
+              }
+
+              th{
+                min-height:30px;
+              }
+
+              td{
+                min-width:100%;
+                margin-bottom: 15px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
