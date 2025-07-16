@@ -154,7 +154,7 @@ export const userInfo = async () => {
 				result = { isLogin: data.status, name: data.nickName, userId: data.id};
 			}
 		}).catch((error)=>{
-			console.log(error);
+			// console.log(error);
 		});
 
 	return result;
