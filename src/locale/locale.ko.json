@@ -153,13 +153,6 @@
 
   "search__condition":"검색 조건",
 
-  "proxy__contract":"--------------------------------------------------",
-  "proxy__contract_title":"프록시 컨트랙트란?",
-  "proxy__contract_patented_title":"BlueBears의 특허 프록시 난독화 기법 소개",
-  "proxy__contract_patented_abstract":"개요",
-  "proxy__contract_patented_details":"상세 구조",
-  "proxy__contract_patented_conclusion":"실행 후",
-
   "alert":"--------------------------------------------------",
   "alert__date__validation" : "검사 시작일은 검사 종료일보다 늦을 수 없습니다.",
   "alert__directory__validation" : "저장 할 디렉토리를 입력해주세요.",

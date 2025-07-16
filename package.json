@@ -1,5 +1,5 @@
 {
-  "name": "blueBEARS",
+  "name": "simulation-damage-manager",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

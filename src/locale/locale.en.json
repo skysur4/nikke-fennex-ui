@@ -155,13 +155,6 @@
 
   "search__condition":"Search Conditions",
 
-  "proxy__contract":"--------------------------------------------------",
-  "proxy__contract_title":"What is Proxy Contract?",
-  "proxy__contract_patented_title":"Introducing BlueBears' Patent Proxy Obfuscation Technique",
-  "proxy__contract_patented_abstract":"Abstract",
-  "proxy__contract_patented_details":"Structure in detail",
-  "proxy__contract_patented_conclusion":"After Running",
-
   "alert":"--------------------------------------------------",
   "alert__date__validation" : "End date cannot be earlier than start date.",
   "alert__directory__validation" : "File path is required.",
