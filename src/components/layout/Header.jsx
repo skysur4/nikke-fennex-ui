@@ -27,7 +27,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
-import HomeIcon from '@mui/icons-material/Home';
+// import HomeIcon from '@mui/icons-material/Home';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 // imgs
@@ -88,8 +88,12 @@ const Header = ({handleChange, current, currentImg}) => {
 		window.location.href = "https://kc.fennex.pro/realms/nikke/account/";
 	}
 
-	const login = () => {
-		window.location.href = gateway.login;
+	const kakaoLogin = () => {
+		window.location.href = gateway.kakaoLogin;
+	}
+
+	const pocketLogin = () => {
+		window.location.href = gateway.pocketLogin;
 	}
 
 	const logout = () => {
@@ -142,7 +146,7 @@ const Header = ({handleChange, current, currentImg}) => {
 
 					{/* 메뉴 목록 */}
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex', lm: 'flex' }, justifyContent: 'center' }}>
-					{isLogin && mainMenu.map((menu, index) => (
+					{mainMenu.map((menu, index) => (
 						<Button key={index} color='inherit' component={Link} to={menu.link} startIcon={menu.icon}>{menu.name}</Button>
 					))}
 					</Box>
@@ -152,7 +156,10 @@ const Header = ({handleChange, current, currentImg}) => {
 					{isLogin ? (
 						<Button color='inherit' startIcon={<AccountCircleIcon />} onClick={handleOpenUserMenu}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{userInfo.name}</Typography></Button>
 					) : (
-						<Button color='inherit' startIcon={<LoginIcon />} onClick={login}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("login")}</Typography></Button>
+						<>
+							<Button color='inherit' startIcon={<LoginIcon />} onClick={kakaoLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("kakao")} {t("login")}</Typography></Button>
+							<Button color='inherit' startIcon={<LoginIcon />} onClick={pocketLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("pocket")} {t("login")}</Typography></Button>
+						</>
 					)}
 
 					{/* 설정 메뉴 */}
@@ -181,12 +188,12 @@ const Header = ({handleChange, current, currentImg}) => {
 					<ListItem disablePadding>
 				      <ListItemButton to={'/'}>
 				        <ListItemIcon>
-				          <HomeIcon/>
+							<img src={currentTheme.isDarkMode ? logoWhite : logo} alt="logo" style={{ height: '1em' }} />
 				        </ListItemIcon>
 				        <ListItemText primary={t("menu__home")} />
 				      </ListItemButton>
 				    </ListItem>
-					{isLogin && mainMenu.map((menu, index) => (
+					{mainMenu.map((menu, index) => (
 						<ListItem disablePadding key={index}>
 					      <ListItemButton to={menu.link}>
 					        <ListItemIcon>

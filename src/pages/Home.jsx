@@ -44,12 +44,12 @@ const Home = () => {
 	const [simulation, setSimulation] = React.useState({
 		userId: null,
 		nickname: null,
-		boss1: 0,
-		boss2: 0,
-		boss3: 0,
-		boss4: 0,
-		boss5: 0,
-		total: 0,
+		boss1: null,
+		boss2: null,
+		boss3: null,
+		boss4: null,
+		boss5: null,
+		total: null,
 		deck1: null,
 		deck2: null,
 		deck3: null,
@@ -73,7 +73,9 @@ const Home = () => {
 	const handleSimulationGet = () => {
 		gateway.get(`/api/v1/score/${userInfo.userId}`)
 			.then((response) =>  {
-				setSimulation(response.data);
+				if( response && response.data) {
+					setSimulation(response.data);
+				}
 				setSimulationDialogOpen(true);
 			}
 		);
@@ -101,7 +103,7 @@ const Home = () => {
 	
     const getScores = async () => {
         const response = await gateway.get('/api/v1/score');
-        if (response.data && response.data.length > 0){
+        if (response && response.data && response.data.length > 0){
 			setRows(response.data.map((row,index) => ({
 	          id: index+1,
 	          userId: row.userId,
@@ -189,36 +191,6 @@ const Home = () => {
 		return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 	}
 
-	const handleAddRow = () => {
-		const hasNewRow = rows.some(row => row.isNew);
-        if (hasNewRow) return;
-		const newRow = {
-					id: rows.length ? rows.length + 1 : 1,
-					userId: null,
-					nickname: null,
-					boss1: 0,
-					boss2: 0,
-					boss3: 0,
-					boss4: 0,
-					boss5: 0,
-					total: 0,
-					deck1: null,
-					deck2: null,
-					deck3: null,
-					deck4: null,
-					deck5: null,
-					updatedAt: null,
-					isNew: true,
-    	};
-		setRows([newRow, ...rows]);
-	};
-
-	const handleProcessRowUpdate = (newRow) => {
-		const updatedRows = rows.map(row => (row.id === newRow.id ? newRow : row));
-    	setRows(updatedRows);
-    	return newRow;
-	};
-
 	const handleCollapse = () => {
 		setCollapse(!collapse);
 
@@ -284,10 +256,10 @@ const Home = () => {
   	};
 
 	React.useEffect(() => {
-    	if (isLogin) {
+		if (isLogin) {
 			getBossInfo();
 			getScores();
-    	}
+		}
   	}, [isLogin]);
 
 	const columns = React.useMemo(() => {
@@ -539,8 +511,6 @@ const Home = () => {
 								<DataGrid
 									rows={rows}
 									columns={columns}
-									// processRowUpdate={handleProcessRowUpdate}
-									// onRowClick={(params) => handleSimulationGet(params)}
 									getRowClassName={getRowClassName}
 									initialState={{
 										pagination: {
@@ -579,50 +549,50 @@ const Home = () => {
 				<DialogTitle id="alert-dialog-title">
 					{t('damage__simulation_result')}
 				</DialogTitle>
-					<DialogContent>
-						<DialogContentText item xs={8} md={12} sm={12} className="edit-form">
-							<Divider textAlign="right">boss 1</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="deck1" label={t('damage__header__deck_1')} type="text" value={simulation.deck1 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="boss1" label={t('damage__header__boss_1')} type="text" value={simulation.boss1 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
+				<DialogContent>
+					<DialogContentText item xs={8} md={12} sm={12} className="edit-form">
+						<Divider textAlign="right">boss 1</Divider>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="deck1" label={t('damage__header__deck_1')} type="text" value={simulation.deck1} onChange={handleSimulationChange}/>
+						</FormControl>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="boss1" label={t('damage__header__boss_1')} type="text" value={simulation.boss1} onChange={handleSimulationChange}/>
+						</FormControl>
 
-							<Divider textAlign="right">boss 2</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="deck2" label={t('damage__header__deck_2')} type="text" value={simulation.deck2 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="boss2" label={t('damage__header__boss_2')} type="text" value={simulation.boss2 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
+						<Divider textAlign="right">boss 2</Divider>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="deck2" label={t('damage__header__deck_2')} type="text" value={simulation.deck2} onChange={handleSimulationChange}/>
+						</FormControl>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="boss2" label={t('damage__header__boss_2')} type="text" value={simulation.boss2} onChange={handleSimulationChange}/>
+						</FormControl>
 
-							<Divider textAlign="right">boss 3</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="deck3" label={t('damage__header__deck_3')} type="text" value={simulation.deck3 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="boss3" label={t('damage__header__boss_3')} type="text" value={simulation.boss3 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
+						<Divider textAlign="right">boss 3</Divider>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="deck3" label={t('damage__header__deck_3')} type="text" value={simulation.deck3} onChange={handleSimulationChange}/>
+						</FormControl>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="boss3" label={t('damage__header__boss_3')} type="text" value={simulation.boss3} onChange={handleSimulationChange}/>
+						</FormControl>
 
-							<Divider textAlign="right">boss 4</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="deck4" label={t('damage__header__deck_4')} type="text" value={simulation.deck4 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="boss4" label={t('damage__header__boss_4')} type="text" value={simulation.boss4 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
+						<Divider textAlign="right">boss 4</Divider>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="deck4" label={t('damage__header__deck_4')} type="text" value={simulation.deck4} onChange={handleSimulationChange}/>
+						</FormControl>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="boss4" label={t('damage__header__boss_4')} type="text" value={simulation.boss4} onChange={handleSimulationChange}/>
+						</FormControl>
 
-							<Divider textAlign="right">boss 5</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="deck5" label={t('damage__header__deck_5')} type="text" value={simulation.deck5 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="boss5" label={t('damage__header__boss_5')} type="text" value={simulation.boss5 || ""} onChange={handleSimulationChange}/>
-							</FormControl>
+						<Divider textAlign="right">boss 5</Divider>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="deck5" label={t('damage__header__deck_5')} type="text" value={simulation.deck5} onChange={handleSimulationChange}/>
+						</FormControl>
+						<FormControl fullWidth sx={{ m: 1 }}>
+							<TextField name="boss5" label={t('damage__header__boss_5')} type="text" value={simulation.boss5} onChange={handleSimulationChange}/>
+						</FormControl>
 
-						</DialogContentText>
-					</DialogContent>
+					</DialogContentText>
+				</DialogContent>
 				<DialogActions>
 					<Button onClick={handleSimulationSave} variant="outlined" startIcon={<SaveIcon />}>{t('btn__save')}</Button>
 					<Button onClick={handleSimulationDelete} variant="outlined" color="warning" startIcon={<DeleteIcon />}>{t('btn__delete')}</Button>
@@ -641,7 +611,7 @@ const Home = () => {
 			>
 				<DialogTitle id="alert-dialog-title">
 					<Box display="flex" justifyContent="space-between" alignItems="center">
-					<Typography variant="h4"  justifyContent={'flex-start'}>{t("damage__title__boss_information")}</Typography>
+					{t("damage__title__boss_information")}
 					<FormControl variant="standard"  justifyContent={'flex-end'} sx={{ m: 1, minWidth: 120 }}>
 						<InputLabel id="demo-simple-select-standard-label">Hard Level</InputLabel>
 							<Select
@@ -655,50 +625,48 @@ const Home = () => {
 					</FormControl>
 					</Box>
 				</DialogTitle>
-					<DialogContent>
-						<DialogContentText item className="edit-form">
-							<Divider textAlign="right">boss 1</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="name1" label={t('damage__header__boss_name')} type="text" value={boss.name1 || ""} onChange={handleBossChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="hp1" label={t('damage__header__boss_hp')} type="text" value={boss.hp1 || ""} onChange={handleBossChange}/>
-							</FormControl>
+				<DialogContent>
+					<Divider textAlign="right">boss 1</Divider>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="name1" label={t('damage__header__boss_name')} type="text" value={boss.name1} onChange={handleBossChange}/>
+					</FormControl>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="hp1" label={t('damage__header__boss_hp')} type="text" value={boss.hp1} onChange={handleBossChange}/>
+					</FormControl>
 
-							<Divider textAlign="right">boss 2</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="name2" label={t('damage__header__boss_name')} type="text" value={boss.name2 || ""} onChange={handleBossChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="hp2" label={t('damage__header__boss_hp')} type="text" value={boss.hp2 || ""} onChange={handleBossChange}/>
-							</FormControl>
+					<Divider textAlign="right">boss 2</Divider>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="name2" label={t('damage__header__boss_name')} type="text" value={boss.name2} onChange={handleBossChange}/>
+					</FormControl>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="hp2" label={t('damage__header__boss_hp')} type="text" value={boss.hp2} onChange={handleBossChange}/>
+					</FormControl>
 
-							<Divider textAlign="right">boss 3</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="name3" label={t('damage__header__boss_name')} type="text" value={boss.name3 || ""} onChange={handleBossChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="hp3" label={t('damage__header__boss_hp')} type="text" value={boss.hp3 || ""} onChange={handleBossChange}/>
-							</FormControl>
+					<Divider textAlign="right">boss 3</Divider>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="name3" label={t('damage__header__boss_name')} type="text" value={boss.name3} onChange={handleBossChange}/>
+					</FormControl>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="hp3" label={t('damage__header__boss_hp')} type="text" value={boss.hp3} onChange={handleBossChange}/>
+					</FormControl>
 
-							<Divider textAlign="right">boss 4</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="name4" label={t('damage__header__boss_name')} type="text" value={boss.name4 || ""} onChange={handleBossChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="hp4" label={t('damage__header__boss_hp')} type="text" value={boss.hp4 || ""} onChange={handleBossChange}/>
-							</FormControl>
+					<Divider textAlign="right">boss 4</Divider>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="name4" label={t('damage__header__boss_name')} type="text" value={boss.name4} onChange={handleBossChange}/>
+					</FormControl>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="hp4" label={t('damage__header__boss_hp')} type="text" value={boss.hp4} onChange={handleBossChange}/>
+					</FormControl>
 
-							<Divider textAlign="right">boss 5</Divider>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="name5" label={t('damage__header__boss_name')} type="text" value={boss.name5 || ""} onChange={handleBossChange}/>
-							</FormControl>
-							<FormControl fullWidth sx={{ m: 1 }}>
-								<TextField name="hp5" label={t('damage__header__boss_hp')} type="text" value={boss.hp5 || ""} onChange={handleBossChange}/>
-							</FormControl>
+					<Divider textAlign="right">boss 5</Divider>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="name5" label={t('damage__header__boss_name')} type="text" value={boss.name5} onChange={handleBossChange}/>
+					</FormControl>
+					<FormControl fullWidth sx={{ m: 1 }}>
+						<TextField name="hp5" label={t('damage__header__boss_hp')} type="text" value={boss.hp5} onChange={handleBossChange}/>
+					</FormControl>
 
-						</DialogContentText>
-					</DialogContent>
+				</DialogContent>
 				<DialogActions>
 					<Button onClick={handleBossSave} variant="outlined" startIcon={<SaveIcon />}>{t('btn__save')}</Button>
 					<Button onClick={handleBossDelete} variant="outlined" color="warning" startIcon={<DeleteIcon />}>{t('btn__delete')}</Button>

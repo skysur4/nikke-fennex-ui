@@ -36,8 +36,9 @@ const PrivacyPageEn = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							This service only allows sign-up via KakaoTalk integration, and only collects the KakaoTalk <RedCode>unique ID</RedCode> during registration.<br/>
-							Basic information such as name and email included in the KakaoTalk profile may be accessed but is never stored or used.
+							This service only allows registration through KakaoTalk integration, and only collects the KakaoTalk <RedCode>unique ID</RedCode> during sign-up.<br/>
+							This is to prevent random people from joining and causing disruptions, and also because manually approving each member is inconvenient.<br/>
+							Although <RedCode>name</RedCode> and <RedCode>email</RedCode> included in the KakaoTalk profile are also provided during integration, they are not stored or used at all.
 						</Typography>
 					</Box>
 				</Box>
@@ -130,7 +131,8 @@ const PrivacyPageKo = () => {
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
 							본 서비스는 카카오톡 연동을 통해서만 회원 가입을 제공하며, 회원 가입 시 카카오톡 <RedCode>고유 ID</RedCode>만를 수집합니다.<br/>
-							카카오톡 프로필에 포함되는 이름, 이메일 등의 기본적인 정보를 연동받기는 하나 일절 저장하거나 사용하지 않습니다.
+							이는 어중이 떠중이들이 괜히 들어와서 방해하는 것을 방지하고 일일이 가입된 멤버를 허용하는 것도 귀찮아서입니다.<br/>
+							연동 시 카카오톡 프로필에 포함되는 <RedCode>이름</RedCode> 및 <RedCode>이메일</RedCode>도 추가로 제공 받기는 하나 일절 저장하거나 사용하지 않습니다.
 						</Typography>
 					</Box>
 				</Box>

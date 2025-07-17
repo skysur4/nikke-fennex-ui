@@ -7,7 +7,10 @@ const defaultOptions = {
 	withCredentials: "same-site"
 }
 
-export const login = apiUrl + '/oauth2/authorization/fennex';
+export const kakaoLogin = apiUrl + '/oauth2/authorization/keycloak';
+
+export const pocketLogin = apiUrl + '/oauth2/authorization/pocket';
+
 
 export const logout = apiUrl + '/logout';
 
@@ -148,13 +151,12 @@ export const userInfo = async () => {
 
 	await axios.get(userinfoUrl, defaultOptions)
 		.then((response) =>	{
-			if (response.status  === 200) {
+			if (response.data && response.data.status) {
 				const data = response.data;
-				console.log(data);
 				result = { isLogin: data.status, name: data.nickName, userId: data.id};
 			}
 		}).catch((error)=>{
-			// console.log(error);
+			console.log(error);
 		});
 
 	return result;

@@ -15,10 +15,10 @@ export const UserProvider = ({ children }) => {
         	if (userData && userData.isLogin) {
           		setUserInfo(userData);
           		setIsLogin(true);
-			} else {
-				setUserInfo(userData);
-				setIsLogin(false);
-				navigate("/");
+			// } else {
+			// 	setUserInfo(userData);
+			// 	setIsLogin(false);
+			// 	navigate("/");
 			}
 	    };
 
