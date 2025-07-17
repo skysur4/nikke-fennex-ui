@@ -153,6 +153,7 @@ export const userInfo = async () => {
 		.then((response) =>	{
 			if (response.data && response.data.status) {
 				const data = response.data;
+				console.log(data);
 				result = { isLogin: data.status, name: data.nickName, userId: data.id};
 			}
 		}).catch((error)=>{
