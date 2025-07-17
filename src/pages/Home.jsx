@@ -509,6 +509,9 @@ const Home = () => {
 
 							<Box sx={{ height: '100%', width:'100%'}}>
 								<DataGrid
+									// filterModel={{
+									// 	items: [{ field: 'nickname', operator: 'equals', value: 'a' }],//['전국꿍디협회', '전국지휘관협회', '전국애꿍협회']
+									// }}
 									rows={rows}
 									columns={columns}
 									getRowClassName={getRowClassName}

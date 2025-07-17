@@ -24,7 +24,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import TuneIcon from '@mui/icons-material/Tune';
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LoginIcon from '@mui/icons-material/Login';
+// import LoginIcon from '@mui/icons-material/Login';	
 import LogoutIcon from '@mui/icons-material/Logout';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 // import HomeIcon from '@mui/icons-material/Home';
@@ -34,6 +34,8 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import logoWhite from "@assets/imgs/nikke_logo_white.png";
 import logo from "@assets/imgs/nikke_logo.png";
 import rapi from "@assets/imgs/rapi.png";
+import kakaotalk from "@assets/imgs/kakaotalk.png";
+import pocketid from "@assets/imgs/pocketid.png";
 
 const Header = ({handleChange, current, currentImg}) => {
 	const currentTheme = useTheme();
@@ -157,8 +159,8 @@ const Header = ({handleChange, current, currentImg}) => {
 						<Button color='inherit' startIcon={<AccountCircleIcon />} onClick={handleOpenUserMenu}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{userInfo.name}</Typography></Button>
 					) : (
 						<>
-							<Button color='inherit' startIcon={<LoginIcon />} onClick={kakaoLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("kakao")} {t("login")}</Typography></Button>
-							<Button color='inherit' startIcon={<LoginIcon />} onClick={pocketLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("pocket")} {t("login")}</Typography></Button>
+							<Button color='inherit' startIcon={<img src={kakaotalk} alt="KakaoTalk" style={{ width: '1em', height: '1em' }} />} onClick={kakaoLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("kakao")} {t("login")}</Typography></Button>
+							<Button color='inherit' startIcon={<img src={pocketid} alt="PocketId" style={{ width: '1em', height: '1em' }} />} onClick={pocketLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("pocket")} {t("login")}</Typography></Button>
 						</>
 					)}
 
@@ -302,21 +304,6 @@ const Header = ({handleChange, current, currentImg}) => {
 				  open={Boolean(anchorElSetting)}
 				  onClose={handleCloseSettingMenu}
 				>
-				{/* 요청에 의하여 히든 처리
-					<ListItem disablePadding>
-					    <Tooltip arrow title={t("theme__tooltip")}>
-							<ListItemButton>
-								<ListItemIcon>
-							    	<ContrastIcon/>
-							   	<Typography>{t("menu__theme")}</Typography>
-							</ListItemIcon>
-								<ListItemText>
-						    <ThemeSwitch />
-								</ListItemText>
-							</ListItemButton>
-						</Tooltip>
-					</ListItem>
-				*/}
 				  <ListItem disablePadding>
 				    <ListItemButton>
 				      <ListItemIcon>

@@ -40,6 +40,8 @@ export default function BaseLayout() {
 					backgroundImage: `url("https://sg-cdn.blablalink.com/standalonesite/ugc/public/image/133c34b9-7f21-4aae-87ae-9e5903399489.jpeg")`,
 					backgroundSize: 'cover', // Optional: Adjust to your needs
 					backgroundColor: `rgb(41, 75, 91)`,
+					backgroundPosition: 'center',
+					backgroundRepeat: 'no-repeat',
 				}}
 
 			>
