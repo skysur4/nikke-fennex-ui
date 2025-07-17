@@ -7,7 +7,6 @@ import { useTheme, styled } from '@mui/material/styles';
 
 // component
 import LanguageSwitch from '@components/pages/LanguageSwitch'
-import ThemeSwitch from '@components/pages/ThemeSwitch'
 import {useTranslation} from "react-i18next";
 import { DateCalendar, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -16,7 +15,7 @@ import 'dayjs/locale/ko';
 import 'dayjs/locale/en';
 
 // ui
-import {Link, useNavigate} from "react-router-dom";
+import {Link} from "react-router-dom";
 import {Paper, Box, AppBar, Toolbar, Typography, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, Divider, Button} from "@mui/material";
 
 // icon
@@ -27,10 +26,6 @@ import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
-import ContrastIcon from '@mui/icons-material/Contrast';
-import LanguageIcon from '@mui/icons-material/Language';
-import HistoryIcon from '@mui/icons-material/History';
-import LayersIcon from '@mui/icons-material/Layers';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 import HomeIcon from '@mui/icons-material/Home';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -38,12 +33,12 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 // imgs
 import logoWhite from "@assets/imgs/nikke_logo_white.png";
 import logo from "@assets/imgs/nikke_logo.png";
+import rapi from "@assets/imgs/rapi.png";
 
 const Header = ({handleChange, current, currentImg}) => {
 	const currentTheme = useTheme();
 	const { userInfo, isLogin } = useUser();
 	const { t, i18n  } = useTranslation();
-	const navigate = useNavigate();
 
 	const Calendar = styled(Paper)(() => ({
 		border: '1px solid',
@@ -53,9 +48,7 @@ const Header = ({handleChange, current, currentImg}) => {
 	}));
 
 	const mainMenu = [
-		//{ index:1, link:"/analytic", icon:<ContentPasteSearchIcon />, name:t("menu__analytic") },
-		// { index:2, link:"/histories", icon:<HistoryIcon />, name:t("menu__histories") },
-		{ index:3, link:"/privacy", icon:<PrivacyTipIcon />, name:t("menu__privacy") },
+		{ index:1, link:"/privacy", icon:<PrivacyTipIcon />, name:t("menu__privacy") },
 	]
 
 	// user popup
@@ -103,8 +96,12 @@ const Header = ({handleChange, current, currentImg}) => {
 		window.location.href = gateway.logout;
 	}
 
+	const playGame = () => {
+		window.open('https://www.nikke-global.com/', '_blank');
+	}
+
 	const gotoGit = () => {
-		window.open('https://github.com/skysur4/fennex-ui', '_blank');
+		window.open('https://github.com/skysur4/nikke-fennex-ui', '_blank');
 	}
 
 	const gotoReact = () => {
@@ -200,6 +197,15 @@ const Header = ({handleChange, current, currentImg}) => {
 					    </ListItem>
 					))}
 					<Divider/>
+					<ListItem disablePadding>
+				      <ListItemButton onClick={playGame}>
+				        <ListItemIcon>
+							{rapi && <img src={rapi} alt="rapi" style={{ width: '1em', height: '1em' }} />}
+				        </ListItemIcon>
+				        <ListItemText primary={'Play Nikke'} />
+				      </ListItemButton>
+					</ListItem>
+
 					<ListItem disablePadding>
 				      <ListItemButton onClick={gotoGit}>
 				        <ListItemIcon>
