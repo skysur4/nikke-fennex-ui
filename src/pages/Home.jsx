@@ -2,10 +2,12 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import { useTheme} from '@mui/material/styles';
 import { Box, Button, Grid, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, Divider, Tooltip } from "@mui/material";
-import { TextField, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { TextField, FormControl, InputLabel, NativeSelect } from "@mui/material";
 import { List, ListItemButton, ListItemIcon, ListItemText, Collapse } from "@mui/material";
 
 import { DataGrid } from '@mui/x-data-grid';
+
+import FilterSection from '@components/pages/FilterSection';
 
 // icon
 import SaveIcon from '@mui/icons-material/Save';
@@ -35,6 +37,7 @@ const Home = () => {
 	const { userInfo, isLogin } = useUser();
 	const { t } = useTranslation();
 
+	const [rowData, setRowData] = React.useState([]);
 	const [rows, setRows] = React.useState([]);
 	const [highlightRowIndex, setHighlightRowIndex] = React.useState([]);
 	const [collapse, setCollapse] = React.useState(true);
@@ -103,8 +106,9 @@ const Home = () => {
 	
     const getScores = async () => {
         const response = await gateway.get('/api/v1/score');
-        if (response && response.data && response.data.length > 0){
-			setRows(response.data.map((row,index) => ({
+        if (response.data && response.data.length > 0){
+			
+			setRowData(response.data.map((row,index) => ({
 	          id: index+1,
 	          userId: row.userId,
 			  nickname: row.nickname,
@@ -121,14 +125,15 @@ const Home = () => {
 			  deck5: row.deck5,
 	          updatedAt: row.updatedAt || '-',
 			  isNew: false,
-			})))
+			})));
+
 		} else {
-			setRows([]);
+			setRowData([]);
 		}
     };
 
 	const [boss, setBoss] = React.useState({
-		level: "1",
+		level: '1',
 		name1: null,
 		name2: null,
 		name3: null,
@@ -193,50 +198,104 @@ const Home = () => {
 
 	const handleCollapse = () => {
 		setCollapse(!collapse);
-
-		if (collapse && isLogin) {
-			setHighlightRowIndex([]);
-			getBossInfo();
-			getScores();
-		}
 	};
 
-	const suggestPlayer = (event) => {
-		let clickedElement = event.currentTarget;
-        let parentElement = clickedElement.parentNode;
-        let siblings = Array.from(parentElement.children).filter(child => child !== clickedElement);
-
-
-		siblings.forEach(sibling => {
-			sibling.classList.remove('suggested-row');
+	const [rowfilters, setRowfilters] = React.useState({
+		union: 'senior',
+	});
+	
+	const handleFilterChange = (event) => {
+	    setRowfilters({
+	      ...rowfilters,
+		  [event.target.name]: event.target.value,
 		});
+	};
 
-		clickedElement.classList.add('suggested-row');	
-
-		const bossId = clickedElement.dataset.boss;
-
-		var bossHP = boss[`hp${bossId}`];
-
-		const sortedRows = [...rows].sort((a, b) => {
-			const aDamage = parseInt(a[`boss${bossId}`]) || 0;
-			const bDamage = parseInt(b[`boss${bossId}`]) || 0;
-			return bDamage - aDamage; // 내림차순 정렬
-		});
-
-		const suggestedPlayer = sortedRows.filter(row => {
-			const playerDamage = parseInt(row[`boss${bossId}`]) || 0;
+	const handleRowFilter = () => {
+		var filteredRows = [];
+		if(rowfilters.union === 'expert'){
+			filteredRows = (rowData || []).filter(data => {
+				return !data.nickname.includes("◆") && !data.nickname.includes("♧");
+			});
 			
-			if(playerDamage < bossHP){
-				bossHP = bossHP - playerDamage;
-				return true; // 해당 플레이어가 보스의 남은 체력보다 적은 피해를 입혔을 경우
-			}
+		} else if(rowfilters.union === 'senior'){
+			filteredRows = (rowData || []).filter(data => {
+				return data.nickname.includes("◆");
+			});
+			
+		} else if(rowfilters.union === 'junior'){
+			filteredRows = (rowData || []).filter(data => {
+				return data.nickname.includes("♧");
+			});
+			
+		} else {
+			filteredRows = rowData;
+		}
 
-			return false
-		});
+		setRows(filteredRows);
 
-		setHighlightRowIndex(suggestedPlayer.map(player => player.id));
+		suggestPlayer();
+	};
 
-		getScores(); // 업데이트된 점수 목록을 가져옵니다.
+	
+	React.useEffect(() => {
+		handleRowFilter();
+  	}, [rowData, rowfilters]);
+
+	const selectedBossRef = React.useRef(null);
+	const suggestPlayer = (event) => {
+		let clickedElement;
+
+		if(event){
+			clickedElement = event.currentTarget;
+
+		} else if(selectedBossRef.current) {
+			clickedElement = selectedBossRef.current;
+
+		} else {
+			return;
+		}
+		
+		if(clickedElement.classList.contains('suggested-row')){
+			clickedElement.classList.remove('suggested-row');
+			setHighlightRowIndex([]);
+			selectedBossRef.current = null;
+
+		} else {
+			let parentElement = clickedElement.parentNode;
+			let siblings = Array.from(parentElement.children).filter(child => child !== clickedElement);
+
+			siblings.forEach(sibling => {
+				sibling.classList.remove('suggested-row');
+			});
+
+			clickedElement.classList.add('suggested-row');
+
+			const bossId = clickedElement.dataset.boss;
+
+			var bossHP = boss[`hp${bossId}`];
+
+			const sortedRows = [...rows].sort((a, b) => {
+				const aDamage = parseInt(a[`boss${bossId}`]) || 0;
+				const bDamage = parseInt(b[`boss${bossId}`]) || 0;
+				return bDamage - aDamage; // 내림차순 정렬
+			});
+
+			const suggestedPlayer = sortedRows.filter(row => {
+				const playerDamage = parseInt(row[`boss${bossId}`]) || 0;
+				
+				if(playerDamage < bossHP){
+					bossHP = bossHP - playerDamage;
+					return true; // 해당 플레이어가 보스의 남은 체력보다 적은 피해를 입혔을 경우
+				}
+
+				return false
+			});
+
+			setHighlightRowIndex(suggestedPlayer.map(player => player.id));
+			selectedBossRef.current = clickedElement;
+
+		}
 	}
 
 	const getRowClassName = (params) => {
@@ -435,11 +494,11 @@ const Home = () => {
 						<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 							<Box display="flex" alignItems="center">
 								{ isLogin &&
-								<Button component={Link} color='error' onClick={handleBossGet} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
+								<Button component={Link} color='warning' onClick={handleBossGet} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
 								}
 							</Box>
 							{ isLogin &&
-							<Button component={Link} color='warning' onClick={handleBossGet} startIcon={<UpgradeIcon />}>{t('damage__title__boss_information')} {t('btn__update')}</Button>
+							<Button component={Link} color='primary' onClick={handleBossGet} startIcon={<UpgradeIcon />}>{t('damage__title__boss_information')} {t('btn__update')}</Button>
 							}
 						</Box>
 						<List component="div" disablePadding sx={{ width: '100%' }}>
@@ -499,19 +558,21 @@ const Home = () => {
 							<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 								<Box display="flex" alignItems="center">
 									{ isLogin &&
-									<Button component={Link} color='error' onClick={handleBossGet} startIcon={<RestartAltIcon />}>{t('damage__simulation_result')} {t('btn__reset')}</Button>
+									<Button component={Link} color='warning' onClick={handleBossGet} startIcon={<RestartAltIcon />}>{t('damage__simulation_result')} {t('btn__reset')}</Button>
 									}
       							</Box>
       							{ isLogin &&
-								<Button component={Link} color='warning' onClick={handleSimulationGet} startIcon={<ScoreIcon />}>{t('damage__simulation_result')} {t('btn__update')}</Button>
+								<Button component={Link} color='primary' onClick={handleSimulationGet} startIcon={<ScoreIcon />}>{t('damage__simulation_result')} {t('btn__update')}</Button>
 								}
 							</Box>
 
 							<Box sx={{ height: '100%', width:'100%'}}>
+								<FilterSection
+									onFilterChange={handleFilterChange}
+									rowfilters={rowfilters}
+								/>
+
 								<DataGrid
-									// filterModel={{
-									// 	items: [{ field: 'nickname', operator: 'equals', value: 'a' }],//['전국꿍디협회', '전국지휘관협회', '전국애꿍협회']
-									// }}
 									rows={rows}
 									columns={columns}
 									getRowClassName={getRowClassName}
@@ -554,7 +615,7 @@ const Home = () => {
 				</DialogTitle>
 				<DialogContent>
 					<DialogContentText item xs={8} md={12} sm={12} className="edit-form">
-						<Divider textAlign="right">boss 1</Divider>
+						<Divider textAlign="right">{boss.name1 || 'boss 1'}</Divider>
 						<FormControl fullWidth sx={{ m: 1 }}>
 							<TextField name="deck1" label={t('damage__header__deck_1')} type="text" value={simulation.deck1} onChange={handleSimulationChange}/>
 						</FormControl>
@@ -562,7 +623,7 @@ const Home = () => {
 							<TextField name="boss1" label={t('damage__header__boss_1')} type="text" value={simulation.boss1} onChange={handleSimulationChange}/>
 						</FormControl>
 
-						<Divider textAlign="right">boss 2</Divider>
+						<Divider textAlign="right">{boss.name2 || 'boss 2'}</Divider>
 						<FormControl fullWidth sx={{ m: 1 }}>
 							<TextField name="deck2" label={t('damage__header__deck_2')} type="text" value={simulation.deck2} onChange={handleSimulationChange}/>
 						</FormControl>
@@ -570,7 +631,7 @@ const Home = () => {
 							<TextField name="boss2" label={t('damage__header__boss_2')} type="text" value={simulation.boss2} onChange={handleSimulationChange}/>
 						</FormControl>
 
-						<Divider textAlign="right">boss 3</Divider>
+						<Divider textAlign="right">{boss.name3 || 'boss 3'}</Divider>
 						<FormControl fullWidth sx={{ m: 1 }}>
 							<TextField name="deck3" label={t('damage__header__deck_3')} type="text" value={simulation.deck3} onChange={handleSimulationChange}/>
 						</FormControl>
@@ -578,7 +639,7 @@ const Home = () => {
 							<TextField name="boss3" label={t('damage__header__boss_3')} type="text" value={simulation.boss3} onChange={handleSimulationChange}/>
 						</FormControl>
 
-						<Divider textAlign="right">boss 4</Divider>
+						<Divider textAlign="right">{boss.name4 || 'boss 4'}</Divider>
 						<FormControl fullWidth sx={{ m: 1 }}>
 							<TextField name="deck4" label={t('damage__header__deck_4')} type="text" value={simulation.deck4} onChange={handleSimulationChange}/>
 						</FormControl>
@@ -586,7 +647,7 @@ const Home = () => {
 							<TextField name="boss4" label={t('damage__header__boss_4')} type="text" value={simulation.boss4} onChange={handleSimulationChange}/>
 						</FormControl>
 
-						<Divider textAlign="right">boss 5</Divider>
+						<Divider textAlign="right">{boss.name5 || 'boss 5'}</Divider>
 						<FormControl fullWidth sx={{ m: 1 }}>
 							<TextField name="deck5" label={t('damage__header__deck_5')} type="text" value={simulation.deck5} onChange={handleSimulationChange}/>
 						</FormControl>
@@ -615,16 +676,14 @@ const Home = () => {
 				<DialogTitle id="alert-dialog-title">
 					<Box display="flex" justifyContent="space-between" alignItems="center">
 					{t("damage__title__boss_information")}
-					<FormControl variant="standard"  justifyContent={'flex-end'} sx={{ m: 1, minWidth: 120 }}>
-						<InputLabel id="demo-simple-select-standard-label">Hard Level</InputLabel>
-							<Select
-							labelId="demo-simple-select-standard-label"
+					<FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+						<InputLabel>Hard Level</InputLabel>
+							<NativeSelect
 							value={boss.level}
 							onChange={handleBossChange}
-							label="Hard Level"
 							>
-							<MenuItem value={1}>1</MenuItem>
-						</Select>
+							<option value={'1'}>1</option>
+						</NativeSelect>
 					</FormControl>
 					</Box>
 				</DialogTitle>

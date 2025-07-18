@@ -156,6 +156,10 @@
   "algorithm__desc__include_proxy_contract": "The traditional method of calling a contract involves the user directly invoking the contract. A Proxy Contract, however, acts as an intermediary that calls the desired contract on behalf of the user. When a user wants to call a function or contract, they provide it as an argument to the Proxy Contract. The Proxy Contract's fallback function then calls the actual contract or function. This way, if the contract is updated, only the address in the Proxy Contract needs to be changed. The user can continue calling the Proxy Contract, enabling the implementation of upgradable contracts. By leveraging this characteristic, important logic within the contract can be executed dynamically and destroyed through the Proxy Contract, preventing hackers from analyzing it (patented).",
 
   "search__condition":"Search Conditions",
+  "search__condition__union":"Union",
+  "search__condition__union_expert":"Expert",
+  "search__condition__union_senior":"Senior",
+  "search__condition__union_junior":"Junior",
 
   "alert":"--------------------------------------------------",
   "alert__date__validation" : "End date cannot be earlier than start date.",

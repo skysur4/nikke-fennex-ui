@@ -37,9 +37,9 @@ export default function BaseLayout() {
 					height: '100vh',
 					justifyContent: 'space-between',
 					flexDirection: 'column',
-					backgroundImage: `url("https://sg-cdn.blablalink.com/standalonesite/ugc/public/image/133c34b9-7f21-4aae-87ae-9e5903399489.jpeg")`,
+					backgroundImage: `url("https://sg-cdn.blablalink.com/standalonesite/ugc/public/image/a2248344-7b9d-4d21-92af-981b694395c5.jpeg?height=1080&width=1920")`,
 					backgroundSize: 'cover', // Optional: Adjust to your needs
-					backgroundColor: `rgb(41, 75, 91)`,
+					backgroundColor: `rgb(20, 21, 78)`,
 					backgroundPosition: 'center',
 					backgroundRepeat: 'no-repeat',
 				}}

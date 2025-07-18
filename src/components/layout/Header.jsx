@@ -160,7 +160,7 @@ const Header = ({handleChange, current, currentImg}) => {
 					) : (
 						<>
 							<Button color='inherit' startIcon={<img src={kakaotalk} alt="KakaoTalk" style={{ width: '1em', height: '1em' }} />} onClick={kakaoLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("kakao")} {t("login")}</Typography></Button>
-							<Button color='inherit' startIcon={<img src={pocketid} alt="PocketId" style={{ width: '1em', height: '1em' }} />} onClick={pocketLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("pocket")} {t("login")}</Typography></Button>
+							{/* <Button color='inherit' startIcon={<img src={pocketid} alt="PocketId" style={{ width: '1em', height: '1em' }} />} onClick={pocketLogin}><Typography sx={{display: { xs: 'none', sm: 'flex' }}}>{t("pocket")} {t("login")}</Typography></Button> */}
 						</>
 					)}
 
