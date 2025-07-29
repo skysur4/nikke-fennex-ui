@@ -91,7 +91,17 @@
   "damage__add_edit_delete_simulation" : "모의전 추가/수정/삭제",
   "damage__simulation_result" : "모의전 결과",
   "damage__hundred_million_unit": "억",
-  
+
+  "damage__user_manual": "사용 방법",
+  "damage__user_manual1": "1. 카카오 로그인을 통해 연동 및 로그인 합니다.",
+  "damage__user_manual2": "2. 오픈카톡 아이디는 유니온 단톡에서 사용하는 이름과 동일하게 입력하세요.",
+  "damage__user_manual3": "3. 모의전 결과 수정 버튼을 눌러 사용덱 및 모의전 점수를 저장합니다.",
+  "damage__user_manual4": "4. 보스 정보가 없을 경우, 보스 정보 수정 버튼을 눌러 보스 정보를 저장합니다.",
+  "damage__user_manual5": "5. 특정 보스를 클릭하면, 체력을 기반으로 추천 멤버가 하이라이트 됩니다.",
+  "damage__user_manual5c": "* 하이라이트 멤버는 큰 점수 순으로 추천되며, 잔여 HP의 오버히트의 기본값은 10%입니다.",
+  "damage__user_manual6": "6. 선택된 보스를 다시 클릭하거나 보스 정보창을 닫으면 추천 멤버 및 잔여 HP 표시가 초기화 됩니다.",
+  "damage__user_manual_warning": "주의: 『보스 정보 초기화』 및 『모의전 결과 초기화』 버튼은 각각의 모든 데이터를 삭제합니다.",
+
   "damage__title__boss_information": "보스 정보",
   "damage__header__boss_name": "보스 이름",
   "damage__header__boss_hp": "보스 체력",
@@ -174,6 +184,7 @@
   "alert__no__select" : "분석 조건을 선택하세요.",
   "alert__project__name__required" : "프로젝트명을 입력해 주세요.",
   "alert__no__files_analyze" : "분석할 파일이 없습니다.",
+  "alert__error" : "오류입니다.",
   "alert__saved" : "저장되었습니다.",
   "alert__deleted" : "삭제되었습니다.",
 

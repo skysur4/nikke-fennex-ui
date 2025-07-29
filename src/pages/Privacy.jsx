@@ -20,11 +20,10 @@ const PrivacyPageEn = () => {
 		<Box className="item" backgroundColor={currentTheme.palette.background.default + '50'} padding={2} borderRadius={2} boxShadow={currentTheme.shadows[1]}>
 
 			{/* --------------------------------------------------------------------------------------------------------------------------- */}
-
 			<Box className="item-header" display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 				<Box display="flex" alignItems="center">
 					<LooksOneIcon/>
-					<span>Notes on Signing Up</span>
+					<span>Kakao Integration</span>
 				</Box>
 			</Box>
 
@@ -36,9 +35,9 @@ const PrivacyPageEn = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							This service only allows registration through KakaoTalk integration, and only collects the KakaoTalk <RedCode>unique ID</RedCode> during sign-up.<br/>
-							This is to prevent random people from joining and causing disruptions, and also because manually approving each member is inconvenient.<br/>
-							Although <RedCode>name</RedCode> and <RedCode>email</RedCode> included in the KakaoTalk profile are also provided during integration, they are not stored or used at all.
+							This service only provides membership registration through KakaoTalk integration, and only uses the KakaoTalk <RedCode>unique ID</RedCode> for registration.<br/>
+							This is to prevent random people from joining and causing trouble, and to avoid the hassle of manually approving each member.<br/>
+							Although <RedCode>name</RedCode> and <RedCode>email</RedCode> included in the KakaoTalk profile are also integrated, they are not stored or used.
 						</Typography>
 					</Box>
 				</Box>
@@ -47,25 +46,7 @@ const PrivacyPageEn = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							When signing up with KakaoTalk, only the <RedCode>Open Chat ID ◆ ♧</RedCode> field is required; the rest can be left blank. For convenience, you can use the ◆ ♧ attached to the field name when entering your ID.
-						</Typography>
-					</Box>
-				</Box>
-
-				<Box className="item-header" display="flex" alignItems="center" justifyContent="space-between" padding={1}>
-					<Box display="flex">
-						<CheckBoxIcon color="success"/>
-						<Typography pb={1}>
-							When signing up with KakaoTalk, the <RedCode>Username</RedCode> is automatically filled with the KakaoTalk <RedCode>unique ID</RedCode> as a number. You may edit it, but if it duplicates another user, registration will fail.
-						</Typography>
-					</Box>
-				</Box>
-
-				<Box className="item-header" display="flex" alignItems="center" justifyContent="space-between" padding={1}>
-					<Box display="flex">
-						<CheckBoxIcon color="success"/>
-						<Typography pb={1}>
-							Email is also not required. Since it is a field that cannot be deleted in Keycloak, it has simply been moved to a lower position.
+							When registering via KakaoTalk integration, it is convenient to copy ◆ ♧ from the instructions provided when entering your ID.
 						</Typography>
 					</Box>
 				</Box>
@@ -76,7 +57,7 @@ const PrivacyPageEn = () => {
 			<Box className="item-header" display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 				<Box display="flex" alignItems="center">
 					<LooksTwoIcon/>
-					<span>Use of Registration Information</span>
+					<span>Use of Integrated Information</span>
 				</Box>
 			</Box>
 
@@ -88,7 +69,7 @@ const PrivacyPageEn = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							The KakaoTalk <RedCode>unique ID</RedCode> is only used when creating Keycloak user information and is not used for actual mock battle score management.
+							The KakaoTalk <RedCode>unique ID</RedCode> is only used when creating Keycloak member information and is not used elsewhere in the app.
 						</Typography>
 					</Box>
 				</Box>
@@ -97,7 +78,8 @@ const PrivacyPageEn = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							Account deletion is available through the profile menu after logging in, but currently it is not properly deleted. Until this is fixed, please notify us via the group chat and we will process it for you.
+							Member withdrawal is available through the profile menu after logging in, but the procedure is complicated.<br/>
+							At your profile, unlink Kakao integration (<RedCode>UNLINK</RedCode>), then notify us via group chat, so we will delete your account.
 						</Typography>
 					</Box>
 				</Box>
@@ -118,7 +100,7 @@ const PrivacyPageKo = () => {
 			<Box className="item-header" display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 				<Box display="flex" alignItems="center">
 					<LooksOneIcon/>
-					<span>회원 가입시 주의할 점</span>
+					<span>카카오 연동</span>
 				</Box>
 			</Box>
 
@@ -130,9 +112,9 @@ const PrivacyPageKo = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							본 서비스는 카카오톡 연동을 통해서만 회원 가입을 제공하며, 회원 가입 시 카카오톡 <RedCode>고유 ID</RedCode>만를 수집합니다.<br/>
+							본 서비스는 카카오톡 연동을 통해서만 회원 가입을 제공하며, 회원 가입 시 카카오톡 <RedCode>고유 ID</RedCode>만를 사용합니다.<br/>
 							이는 어중이 떠중이들이 괜히 들어와서 방해하는 것을 방지하고 일일이 가입된 멤버를 허용하는 것도 귀찮아서입니다.<br/>
-							연동 시 카카오톡 프로필에 포함되는 <RedCode>이름</RedCode> 및 <RedCode>이메일</RedCode>도 추가로 제공 받기는 하나 일절 저장하거나 사용하지 않습니다.
+							카카오톡 프로필에 포함되는 <RedCode>이름</RedCode> 및 <RedCode>이메일</RedCode>도 연동 되지만 저장하거나 사용하지 않습니다.
 						</Typography>
 					</Box>
 				</Box>
@@ -141,25 +123,7 @@ const PrivacyPageKo = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							카카오톡 연동 가입 시, <RedCode>오픈카톡아이디 ◆ ♧</RedCode> 항목을 제외한 나머지는 입력이 불필요합니다. 아이디 입력 시에는 필드명에 붙어있는 ◆ ♧를 사용시면 편합니다.
-						</Typography>
-					</Box>
-				</Box>
-
-				<Box className="item-header" display="flex" alignItems="center" justifyContent="space-between" padding={1}>
-					<Box display="flex">
-						<CheckBoxIcon color="success"/>
-						<Typography pb={1}>
-							카카오톡 연동 가입 시, <RedCode>사용자 이름</RedCode>은 카카오톡 <RedCode>고유 ID</RedCode>를 사용하여, 숫자로 자동입력 됩니다. 수정해도 무방하지만, 다른 사용자와 중복될 경우 가입에 실패하게 됩니다.
-						</Typography>
-					</Box>
-				</Box>
-
-				<Box className="item-header" display="flex" alignItems="center" justifyContent="space-between" padding={1}>
-					<Box display="flex">
-						<CheckBoxIcon color="success"/>
-						<Typography pb={1}>
-							이메일 또한 입력이 불필요하며, 키클락 자체에서 삭제 불가능한 필드여서 위치만 아래로 내려놓았습니다.
+							카카오톡 연동 가입 시, 아이디 입력 시 전지협/애꿍협 분들의 안내문에 있는 ◆ ♧를 복사하여 사용시면 편합니다.
 						</Typography>
 					</Box>
 				</Box>
@@ -170,7 +134,7 @@ const PrivacyPageKo = () => {
 			<Box className="item-header" display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 				<Box display="flex" alignItems="center">
 					<LooksTwoIcon/>
-					<span>가입 정보 활용</span>
+					<span>연동 정보 활용</span>
 				</Box>
 			</Box>
 
@@ -182,7 +146,7 @@ const PrivacyPageKo = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							카카오톡 <RedCode>고유 ID</RedCode>는 키클락 회원정보 생성 시에만 사용되며, 실제 모의전 점수 관리에는 사용되지 않습니다.
+							카카오톡 <RedCode>고유 ID</RedCode>는 키클락 회원정보 생성 시에만 사용되며, 앱 내부적으로 따로 사용되지 않습니다.
 						</Typography>
 					</Box>
 				</Box>
@@ -191,7 +155,8 @@ const PrivacyPageKo = () => {
 					<Box display="flex">
 						<CheckBoxIcon color="success"/>
 						<Typography pb={1}>
-							회원 탈퇴는 로그인 후, 프로필 메뉴를 통해 기능은 제공되고 있지만, 현재로는 제대로 삭제되지 않고 있으니, 수정 전까진 단톡방을 통해 알려주시면, 처리해 드리도록 하겠습니다.
+							회원 탈퇴는 로그인 후, 프로필 메뉴를 통해 기능은 제공되고 있지만, 절차가 복잡합니다.<br/>
+							프로필 이동 후 카카오 연동 <RedCode>UNLINK</RedCode> 후 단톡방을 통해 알려주시면, 삭제 처리해 드리겠습니다.
 						</Typography>
 					</Box>
 				</Box>

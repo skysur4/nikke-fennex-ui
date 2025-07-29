@@ -25,8 +25,8 @@ export const connectChannel = () => {
 
 /**
  * GET 방식으로 gateway 호출
- * @param {string} props 호출 경로
- * @param {object} props axios 호출 옵션
+ * @param {string} path 호출 경로
+ * @param {object} opts axios 호출 옵션
  * @returns {object}
  */
 export const get = async(path, opts) => {
@@ -64,7 +64,7 @@ export const post = async(path, payload) => {
 				alert("처리중 오류가 발생했습니다.");
 			}
 		}).catch((error)=>{
-			result = error.response;
+			alert("처리중 오류가 발생했습니다.");
 			console.log(error);
 		});
 	return result;
@@ -147,6 +147,7 @@ export const check = async(path, opts) => {
 }
 
 export const userInfo = async () => {
+	const admins = ["꿍디빵디", "마이농◆", "플러시◆"]
 	let result = { isLogin : false };
 
 	await axios.get(userinfoUrl, defaultOptions)
@@ -154,7 +155,7 @@ export const userInfo = async () => {
 			if (response.data && response.data.status) {
 				const data = response.data;
 				console.log(data);
-				result = { isLogin: data.status, name: data.nickName, userId: data.id};
+				result = { isLogin: data.status, name: data.nickName, userId: data.id, isAdmin: admins.includes(data.nickName) };
 			}
 		}).catch((error)=>{
 			console.log(error);

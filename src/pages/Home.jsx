@@ -1,7 +1,20 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { useTheme} from '@mui/material/styles';
-import { Box, Button, Grid, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, Divider, Tooltip } from "@mui/material";
+import {
+	Box,
+	Button,
+	Grid,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
+	Typography,
+	Divider,
+	Tooltip,
+	Table, TableBody, TableRow, TableCell, TableHead
+} from "@mui/material";
 import { TextField, FormControl, InputLabel, NativeSelect } from "@mui/material";
 import { List, ListItemButton, ListItemIcon, ListItemText, Collapse } from "@mui/material";
 
@@ -31,16 +44,18 @@ import NoDataGrid from '@components/common/NoDataGrid';
 import { useUser } from '@components/common/UserContext';
 import * as gateway from '@components/common/Gateway';
 import Alert from '@components/ui/Alert';
+import {roundToDecimalPlaces} from "@mui/x-data-grid/utils/roundToDecimalPlaces";
 
 const Home = () => {
 	const currentTheme = useTheme();
-	const { userInfo, isLogin } = useUser();
+	const { userInfo, isLogin, isAdmin } = useUser();
 	const { t } = useTranslation();
 
 	const [rowData, setRowData] = React.useState([]);
 	const [rows, setRows] = React.useState([]);
 	const [highlightRowIndex, setHighlightRowIndex] = React.useState([]);
-	const [collapse, setCollapse] = React.useState(true);
+	const [collapseBoss, setCollapseBoss] = React.useState(true);
+	const [collapseManual, setCollapseManual] = React.useState(false);
   	const [alertText, setAlertText] = React.useState('');
 	const [isAlertVisible, setIsAlertVisible] = React.useState(false);
 
@@ -88,7 +103,7 @@ const Home = () => {
 		gateway.post('/api/v1/score', simulation)
 			.then((response) =>  {
 				getScores();
-				setSimulationDialogOpen(false);
+				handleSimulationDialogClose();
 				showAlert(t('alert__saved'));
 			}
 		);
@@ -98,7 +113,7 @@ const Home = () => {
 		gateway.del('/api/v1/score')
 			.then((response) =>  {
 				getScores();
-				setSimulationDialogOpen(false);
+				handleSimulationDialogClose();
 				showAlert(t('alert__deleted'));
 			}
 		);
@@ -145,13 +160,21 @@ const Home = () => {
 		hp4: 0,
 		hp5: 0,
 	});
+
+	const [currentBossHp, setCurrentBossHp] = React.useState({
+		hp1: 0,
+		hp2: 0,
+		hp3: 0,
+		hp4: 0,
+		hp5: 0,
+	});
 	
 	const [bossDialogOpen, setBossDialogOpen] = React.useState(false);
 
 	const handleBossChange = (e) => {
 		setBoss({
 			...boss,
-			[e.target.name]: e.target.value,
+			[e.target.name]: e.target.name.startsWith('hp') ? parseInt(e.target.value) : e.target.value,
 		});
 	};
 
@@ -168,15 +191,16 @@ const Home = () => {
 		gateway.post('/api/v1/boss', boss)
 			.then((response) =>  {
 				setBoss(response.data);
+				handleBossDialogClose();
 				showAlert(t('alert__saved'));
-			}
-		);
+			});
 	};
 
 	const handleBossDelete = () => {
 		gateway.del('/api/v1/boss')
 			.then((response) =>  {
 				setBoss(response.data);
+				handleBossDialogClose();
 				showAlert(t('alert__deleted'));
 			}
 		);
@@ -191,13 +215,19 @@ const Home = () => {
 
 	const formatNumber = (number) => {
 		if(currentTheme.isMobile) {
-			return (number / 100000000).toFixed(2) + t('damage__hundred_million_unit');
+			return roundToDecimalPlaces(number / 100000000, 0) + t('damage__hundred_million_unit');
 		}
 		return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 	}
 
-	const handleCollapse = () => {
-		setCollapse(!collapse);
+	const handleCollapseBoss = () => {
+		setCollapseBoss(!collapseBoss);
+
+		suggestPlayer();
+	};
+
+	const handleCollapseManual = () => {
+		setCollapseManual(!collapseManual);
 	};
 
 	const [rowfilters, setRowfilters] = React.useState({
@@ -212,7 +242,7 @@ const Home = () => {
 	};
 
 	const handleRowFilter = () => {
-		var filteredRows = [];
+		let filteredRows;
 		if(rowfilters.union === 'expert'){
 			filteredRows = (rowData || []).filter(data => {
 				return !data.nickname.includes("◆") && !data.nickname.includes("♧");
@@ -255,11 +285,21 @@ const Home = () => {
 		} else {
 			return;
 		}
-		
+
+		// 추천 초기화
 		if(clickedElement.classList.contains('suggested-row')){
 			clickedElement.classList.remove('suggested-row');
 			setHighlightRowIndex([]);
 			selectedBossRef.current = null;
+
+			// 잔여 HP 항상 초기화
+			setCurrentBossHp({
+				hp1: 0,
+				hp2: 0,
+				hp3: 0,
+				hp4: 0,
+				hp5: 0,
+			});
 
 		} else {
 			let parentElement = clickedElement.parentNode;
@@ -273,7 +313,7 @@ const Home = () => {
 
 			const bossId = clickedElement.dataset.boss;
 
-			var bossHP = boss[`hp${bossId}`];
+			let bossHP = boss[`hp${bossId}`];
 
 			const sortedRows = [...rows].sort((a, b) => {
 				const aDamage = parseInt(a[`boss${bossId}`]) || 0;
@@ -283,10 +323,19 @@ const Home = () => {
 
 			const suggestedPlayer = sortedRows.filter(row => {
 				const playerDamage = parseInt(row[`boss${bossId}`]) || 0;
-				
-				if(playerDamage < bossHP){
+				const overheat = 1.1;
+
+				if(bossHP > 0 && bossHP * overheat > playerDamage ){
+					// 해당 플레이어가 보스의 남은 체력보다 적은 피해를 입혔을 경우
 					bossHP = bossHP - playerDamage;
-					return true; // 해당 플레이어가 보스의 남은 체력보다 적은 피해를 입혔을 경우
+
+					// 잔여 HP 표시
+					setCurrentBossHp({
+						...currentBossHp,
+						[`hp${bossId}`]: bossHP,
+					});
+
+					return true;
 				}
 
 				return false
@@ -349,7 +398,7 @@ const Home = () => {
 		  },
 		  {
 		    field: 'boss1',
-		    headerName: t('damage__header__boss_1'),
+		    headerName: boss.name1 || t('damage__header__boss_1'),
 		    flex: 1,
             minWidth: 50,
 			headerAlign: 'center',
@@ -360,7 +409,7 @@ const Home = () => {
 		  },
 		  {
 		    field: 'boss2',
-		    headerName: t('damage__header__boss_2'),
+		    headerName: boss.name2 || t('damage__header__boss_2'),
 		    flex: 1,
             minWidth: 50,
 			headerAlign: 'center',
@@ -371,7 +420,7 @@ const Home = () => {
 		  },
 		  {
 		    field: 'boss3',
-		    headerName: t('damage__header__boss_3'),
+		    headerName: boss.name3 || t('damage__header__boss_3'),
 		    flex: 1,
             minWidth: 50,
 			headerAlign: 'center',
@@ -382,7 +431,7 @@ const Home = () => {
 		  },
 		  {
 		    field: 'boss4',
-		    headerName: t('damage__header__boss_4'),
+		    headerName: boss.name4 || t('damage__header__boss_4'),
 		    flex: 1,
             minWidth: 50,
 			headerAlign: 'center',
@@ -393,7 +442,7 @@ const Home = () => {
 		  },
 		  {
 		    field: 'boss5',
-		    headerName: t('damage__header__boss_5'),
+		    headerName: boss.name5 || t('damage__header__boss_5'),
 		    flex: 1,
             minWidth: 50,
 			headerAlign: 'center',
@@ -488,12 +537,29 @@ const Home = () => {
 					<Grid container item md={8} sm={12} flexDirection={'column'} justifyContent={'flex-start'}>
 						<Typography variant="h4" pb={1}>{t("home__title")}</Typography>
 						<Typography variant="caption" sx={{ pl: 1 }}>{t("home__description")}</Typography>
+						<List component="div" disablePadding sx={{ width: '100%' }}>
+							<ListItemButton onClick={handleCollapseManual}>
+								{collapseManual ? <ExpandLess /> : <ExpandMore />}
+								<ListItemText primary={t("damage__user_manual")} />
+							</ListItemButton>
+							<Collapse in={collapseManual} timeout="auto" unmountOnExit>
+								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual1")}</Typography>
+								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual2")}</Typography>
+								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual3")}</Typography>
+								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual4")}</Typography>
+								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual5")}</Typography>
+								<Typography variant="caption" sx={{ pl: 1 }} color='primary'>{t("damage__user_manual5c")}</Typography>
+								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual6")}</Typography>
+								{isAdmin && <Typography variant="body2" sx={{ pl: 1, mt: 1, color: "orangered", backgroundColor: "black" }}>{t("damage__user_manual_warning")}</Typography>}
+
+							</Collapse>
+						</List>
 					</Grid>
 
 					<Grid container item md={4} sm={12} flexDirection={'column'} justifyContent="flex-end">
 						<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 							<Box display="flex" alignItems="center">
-								{ isLogin &&
+								{ isLogin && isAdmin &&
 								<Button component={Link} color='warning' onClick={handleBossGet} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
 								}
 							</Box>
@@ -502,11 +568,11 @@ const Home = () => {
 							}
 						</Box>
 						<List component="div" disablePadding sx={{ width: '100%' }}>
-							<ListItemButton onClick={handleCollapse}>
+							<ListItemButton onClick={handleCollapseBoss}>
 								<ListItemText primary={t("damage__title__boss_information")} secondary={t("damage__header__hard") + " " + t("damage__header__level") + ": " + boss.level} />
-								{collapse ? <ExpandLess /> : <ExpandMore />}
+								{collapseBoss ? <ExpandLess /> : <ExpandMore />}
 							</ListItemButton>
-							<Collapse in={collapse} timeout="auto" unmountOnExit>
+							<Collapse in={collapseBoss} timeout="auto" unmountOnExit>
 								<List component="div" disablePadding>
 									{ boss.hp1 > 0 &&
 									<ListItemButton sx={{ pl: 4 }} onClick={suggestPlayer} data-boss="1">
@@ -557,7 +623,7 @@ const Home = () => {
 						<Box className="item">
 							<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 								<Box display="flex" alignItems="center">
-									{ isLogin &&
+									{ isLogin && isAdmin &&
 									<Button component={Link} color='warning' onClick={handleBossGet} startIcon={<RestartAltIcon />}>{t('damage__simulation_result')} {t('btn__reset')}</Button>
 									}
       							</Box>
@@ -599,6 +665,30 @@ const Home = () => {
 				</Grid>
 			</div>
 			<div className="section-footer">
+				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={2} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between">
+					<Table border={1} borderRadius={2} boxShadow={currentTheme.shadows[1]}>
+						<TableHead style={{backgroundColor: currentTheme.palette.background.default}}>
+							<TableRow>
+								<TableCell>보스명</TableCell>
+								<TableCell>{boss.name1 || t('damage__header__boss_1')}</TableCell>
+								<TableCell>{boss.name2 || t('damage__header__boss_2')}</TableCell>
+								<TableCell>{boss.name3 || t('damage__header__boss_3')}</TableCell>
+								<TableCell>{boss.name4 || t('damage__header__boss_4')}</TableCell>
+								<TableCell>{boss.name5 || t('damage__header__boss_5')}</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							<TableRow>
+								<TableCell>잔여 HP</TableCell>
+								<TableCell style={currentBossHp.hp1 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp1)}</TableCell>
+								<TableCell style={currentBossHp.hp2 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp2)}</TableCell>
+								<TableCell style={currentBossHp.hp3 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp3)}</TableCell>
+								<TableCell style={currentBossHp.hp4 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp4)}</TableCell>
+								<TableCell style={currentBossHp.hp5 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp5)}</TableCell>
+							</TableRow>
+						</TableBody>
+					</Table>
+				</Grid>
 			</div>
 
 			{/* 모의전 모달 */}
@@ -693,7 +783,7 @@ const Home = () => {
 						<TextField name="name1" label={t('damage__header__boss_name')} type="text" value={boss.name1} onChange={handleBossChange}/>
 					</FormControl>
 					<FormControl fullWidth sx={{ m: 1 }}>
-						<TextField name="hp1" label={t('damage__header__boss_hp')} type="text" value={boss.hp1} onChange={handleBossChange}/>
+						<TextField name="hp1" label={t('damage__header__boss_hp')} type="number" value={boss.hp1} onChange={handleBossChange}/>
 					</FormControl>
 
 					<Divider textAlign="right">boss 2</Divider>
@@ -701,7 +791,7 @@ const Home = () => {
 						<TextField name="name2" label={t('damage__header__boss_name')} type="text" value={boss.name2} onChange={handleBossChange}/>
 					</FormControl>
 					<FormControl fullWidth sx={{ m: 1 }}>
-						<TextField name="hp2" label={t('damage__header__boss_hp')} type="text" value={boss.hp2} onChange={handleBossChange}/>
+						<TextField name="hp2" label={t('damage__header__boss_hp')} type="number" value={boss.hp2} onChange={handleBossChange}/>
 					</FormControl>
 
 					<Divider textAlign="right">boss 3</Divider>
@@ -709,7 +799,7 @@ const Home = () => {
 						<TextField name="name3" label={t('damage__header__boss_name')} type="text" value={boss.name3} onChange={handleBossChange}/>
 					</FormControl>
 					<FormControl fullWidth sx={{ m: 1 }}>
-						<TextField name="hp3" label={t('damage__header__boss_hp')} type="text" value={boss.hp3} onChange={handleBossChange}/>
+						<TextField name="hp3" label={t('damage__header__boss_hp')} type="number" value={boss.hp3} onChange={handleBossChange}/>
 					</FormControl>
 
 					<Divider textAlign="right">boss 4</Divider>
@@ -717,7 +807,7 @@ const Home = () => {
 						<TextField name="name4" label={t('damage__header__boss_name')} type="text" value={boss.name4} onChange={handleBossChange}/>
 					</FormControl>
 					<FormControl fullWidth sx={{ m: 1 }}>
-						<TextField name="hp4" label={t('damage__header__boss_hp')} type="text" value={boss.hp4} onChange={handleBossChange}/>
+						<TextField name="hp4" label={t('damage__header__boss_hp')} type="number" value={boss.hp4} onChange={handleBossChange}/>
 					</FormControl>
 
 					<Divider textAlign="right">boss 5</Divider>
@@ -725,7 +815,7 @@ const Home = () => {
 						<TextField name="name5" label={t('damage__header__boss_name')} type="text" value={boss.name5} onChange={handleBossChange}/>
 					</FormControl>
 					<FormControl fullWidth sx={{ m: 1 }}>
-						<TextField name="hp5" label={t('damage__header__boss_hp')} type="text" value={boss.hp5} onChange={handleBossChange}/>
+						<TextField name="hp5" label={t('damage__header__boss_hp')} type="number" value={boss.hp5} onChange={handleBossChange}/>
 					</FormControl>
 
 				</DialogContent>

@@ -92,6 +92,16 @@
   "damage__simulation_result" : "Simulation Result",
   "damage__hundred_million_unit": "HM",
 
+  "damage__user_manual": "User Manual",
+  "damage__user_manual1": "1. Link and log in via Kakao Login.",
+  "damage__user_manual2": "2. Enter your OpenKakao ID the same as the name used in the Union group chat.",
+  "damage__user_manual3": "3. Click the Edit Simulation Result button to save your deck and simulation score.",
+  "damage__user_manual4": "4. If there is no boss information, click the Edit Boss Info button to save boss details.",
+  "damage__user_manual5": "5. Clicking a specific boss will highlight recommended members based on remaining HP.",
+  "damage__user_manual5c": "* Recommended members are suggested by highest score, and default overhit rate for remaining HP is 10%.",
+  "damage__user_manual6": "6. Clicking the selected boss again or closing the boss info window will reset the recommended members and remaining HP display.",
+  "damage__user_manual_warning": "Warning: The 'Reset Boss Info' and 'Reset Simulation Result' buttons will delete all respective data.",
+
   "damage__title__boss_information": "Boss Information",
   "damage__header__boss_name": "Boss Name",
   "damage__header__boss_hp": "Boss HP",
@@ -175,6 +185,7 @@
   "alert__no__select" : "Select analysis conditions.",
   "alert__project__name__required" : "project name required!",
   "alert__no__files_analyze" : "There are no files to analyze.",
+  "alert__error" : "Failed.",
   "alert__saved" : "Saved.",
   "alert__deleted" : "Deleted.",
 
