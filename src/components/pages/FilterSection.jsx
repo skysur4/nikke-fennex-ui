@@ -15,24 +15,6 @@ const FilterSection = ({ onFilterChange, rowfilters }) => {
                     <FormGroup>
                         <Box display="flex" alignItems="center" justifyContent="left" pl={2} pr={2} pt={1} pb={1}>
                             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                                <InputLabel>{t('damage__header__overheat')} {t('damage__header__rate')}</InputLabel>
-                                <NativeSelect
-                                    name="overheat"
-                                    value={rowfilters.overheat}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value={1.00}>0%</option>
-                                    <option value={1.05}>5%</option>
-                                    <option value={1.10}>10%</option>
-                                </NativeSelect>
-                            </FormControl>
-                        </Box>
-                    </FormGroup>
-                </Grid>
-                <Grid item md={6} sm={6} xs={6}>
-                    <FormGroup>
-                        <Box display="flex" alignItems="center" justifyContent="right" pl={2} pr={2} pt={1} pb={1}>
-                            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
                                 <InputLabel>{t('search__condition__union')}</InputLabel>
                                 <NativeSelect
                                     name="union"
@@ -42,6 +24,25 @@ const FilterSection = ({ onFilterChange, rowfilters }) => {
                                     <option value={'expert'}>{t('search__condition__union_expert')}</option>
                                     <option value={'senior'}>{t('search__condition__union_senior')}</option>
                                     <option value={'junior'}>{t('search__condition__union_junior')}</option>
+                                </NativeSelect>
+                            </FormControl>
+                        </Box>
+                    </FormGroup>
+                </Grid>
+
+                <Grid item md={6} sm={6} xs={6}>
+                    <FormGroup>
+                        <Box display="flex" alignItems="center" justifyContent="right" pl={2} pr={2} pt={1} pb={1}>
+                            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                                <InputLabel>{t('damage__header__overheat')} {t('damage__header__rate')}</InputLabel>
+                                <NativeSelect
+                                    name="overheat"
+                                    value={rowfilters.overheat}
+                                    onChange={onFilterChange}
+                                >
+                                    <option value={1.00}>0%</option>
+                                    <option value={1.05}>5%</option>
+                                    <option value={1.10}>10%</option>
                                 </NativeSelect>
                             </FormControl>
                         </Box>

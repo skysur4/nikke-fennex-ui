@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from "react-router-dom";
-import { useTheme} from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 import {
 	Box,
 	Button,
@@ -13,7 +14,7 @@ import {
 	Typography,
 	Divider,
 	Tooltip,
-	Table, TableBody, TableRow, TableCell, TableHead, TableContainer, Paper
+	Table, TableBody, TableRow, TableCell, TableHead, TableContainer, Paper,
 } from "@mui/material";
 import { TextField, FormControl, InputLabel, NativeSelect } from "@mui/material";
 import { List, ListItemButton, ListItemIcon, ListItemText, Collapse } from "@mui/material";
@@ -50,6 +51,17 @@ const Home = () => {
 	const currentTheme = useTheme();
 	const { userInfo, isLogin, isAdmin } = useUser();
 	const { t } = useTranslation();
+
+	const useStyles = makeStyles({
+		tableCell: {
+			textAlign: 'center',
+			alignItems: 'center',
+			// borderRight: 'rgba(224, 224, 224, 1)', // Add a right border to each cell
+			// '&:last-child': {
+			// 	borderRight: 'none', // Remove the border from the last cell in a row
+			// },
+		},
+	});
 
 	const [rowData, setRowData] = React.useState([]);
 	const [rows, setRows] = React.useState([]);
@@ -656,24 +668,24 @@ const Home = () => {
 				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={2} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between">
 					<TableContainer component={Paper} sx={{ borderRadius: '2' }}> {/* Apply border-radius here */}
 						<Table border={1} borderRadius={2} boxShadow={currentTheme.shadows[1]}>
-							<TableHead style={{backgroundColor: currentTheme.palette.background.default}}>
-								<TableRow>
-									<TableCell>{t('damage__header__boss_name')}</TableCell>
-									<TableCell>{boss.name1 || t('damage__header__boss_1')}</TableCell>
-									<TableCell>{boss.name2 || t('damage__header__boss_2')}</TableCell>
-									<TableCell>{boss.name3 || t('damage__header__boss_3')}</TableCell>
-									<TableCell>{boss.name4 || t('damage__header__boss_4')}</TableCell>
-									<TableCell>{boss.name5 || t('damage__header__boss_5')}</TableCell>
+							<TableHead sx={{backgroundColor: currentTheme.palette.background.default }}>
+								<TableRow sx={{alignItems:'center'}}>
+									<TableCell sx={{textAlign:'center'}}>{t('damage__header__remaining')} HP</TableCell>
+									<TableCell sx={{textAlign:'center'}}>{boss.name1 || t('damage__header__boss_1')}</TableCell>
+									<TableCell sx={{textAlign:'center'}}>{boss.name2 || t('damage__header__boss_2')}</TableCell>
+									<TableCell sx={{textAlign:'center'}}>{boss.name3 || t('damage__header__boss_3')}</TableCell>
+									<TableCell sx={{textAlign:'center'}}>{boss.name4 || t('damage__header__boss_4')}</TableCell>
+									<TableCell sx={{textAlign:'center'}}>{boss.name5 || t('damage__header__boss_5')}</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
 								<TableRow>
-									<TableCell>{t('damage__header__remaining')} HP</TableCell>
-									<TableCell style={currentBossHp.hp1 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp1)}</TableCell>
-									<TableCell style={currentBossHp.hp2 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp2)}</TableCell>
-									<TableCell style={currentBossHp.hp3 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp3)}</TableCell>
-									<TableCell style={currentBossHp.hp4 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp4)}</TableCell>
-									<TableCell style={currentBossHp.hp5 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp5)}</TableCell>
+									<TableCell sx={{textAlign:'center'}}>{t('damage__header__overheat')} ({(rowfilters.overheat * 100 - 100).toFixed(0)}%)</TableCell>
+									<TableCell sx={{textAlign:'right', color: currentBossHp.hp1 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp1)}</TableCell>
+									<TableCell sx={{textAlign:'right', color: currentBossHp.hp2 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp2)}</TableCell>
+									<TableCell sx={{textAlign:'right', color: currentBossHp.hp3 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp3)}</TableCell>
+									<TableCell sx={{textAlign:'right', color: currentBossHp.hp4 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp4)}</TableCell>
+									<TableCell sx={{textAlign:'right', color: currentBossHp.hp5 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp5)}</TableCell>
 								</TableRow>
 							</TableBody>
 						</Table>
