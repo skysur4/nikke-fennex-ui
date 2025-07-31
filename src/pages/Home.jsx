@@ -13,7 +13,7 @@ import {
 	Typography,
 	Divider,
 	Tooltip,
-	Table, TableBody, TableRow, TableCell, TableHead
+	Table, TableBody, TableRow, TableCell, TableHead, TableContainer, Paper
 } from "@mui/material";
 import { TextField, FormControl, InputLabel, NativeSelect } from "@mui/material";
 import { List, ListItemButton, ListItemIcon, ListItemText, Collapse } from "@mui/material";
@@ -67,7 +67,6 @@ const Home = () => {
 		boss3: null,
 		boss4: null,
 		boss5: null,
-		total: null,
 		deck1: null,
 		deck2: null,
 		deck3: null,
@@ -132,7 +131,6 @@ const Home = () => {
 	          boss3: row.boss3,
 			  boss4: row.boss4,
 	          boss5: row.boss5,
-			  total: parseInt(row.boss1 || 0) + parseInt(row.boss2 || 0) + parseInt(row.boss3 || 0) + parseInt(row.boss4 || 0) + parseInt(row.boss5 || 0),
 			  deck1: row.deck1,
 	          deck2: row.deck2,
 			  deck3: row.deck3,
@@ -231,6 +229,7 @@ const Home = () => {
 	};
 
 	const [rowfilters, setRowfilters] = React.useState({
+		overheat: 1.10,
 		union: 'senior',
 	});
 	
@@ -323,9 +322,8 @@ const Home = () => {
 
 			const suggestedPlayer = sortedRows.filter(row => {
 				const playerDamage = parseInt(row[`boss${bossId}`]) || 0;
-				const overheat = 1.1;
 
-				if(bossHP > 0 && bossHP * overheat > playerDamage ){
+				if(bossHP > 0 && bossHP * rowfilters.overheat >= playerDamage ){
 					// 해당 플레이어가 보스의 남은 체력보다 적은 피해를 입혔을 경우
 					bossHP = bossHP - playerDamage;
 
@@ -452,16 +450,6 @@ const Home = () => {
 			renderCell: (params) => <Tooltip title={params.row.deck5}><span>{params.formattedValue}</span></Tooltip>,
 		  },
 		  {
-		    field: 'total',
-		    headerName: t('damage__header__total'),
-		    flex: 1,
-            minWidth: 50,
-		    headerAlign: 'center',
-		    align: 'right',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-			valueGetter: (value, row) => formatNumber(parseInt(row.boss5) + parseInt(row.boss4) + parseInt(row.boss3) + parseInt(row.boss2) + parseInt(row.boss1)),
-		  },
-		  {
 		    field: 'deck1',
 		    headerName: t('damage__header__deck_1'),
 		    flex: 1,
@@ -519,7 +507,7 @@ const Home = () => {
 
     	if (currentTheme.isMobile) {
 			return initialColumns.filter(column => ![ 'userId'
-													,'deck1', 'deck2', 'deck3', 'deck4', 'deck5', 'updatedAt', 'total' ].includes(column.field)
+													,'deck1', 'deck2', 'deck3', 'deck4', 'deck5', 'updatedAt' ].includes(column.field)
 			)
     	} else {
 			return initialColumns.filter(column => ![ 'userId'
@@ -548,7 +536,7 @@ const Home = () => {
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual3")}</Typography>
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual4")}</Typography>
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual5")}</Typography>
-								<Typography variant="caption" sx={{ pl: 1 }} color='primary'>{t("damage__user_manual5c")}</Typography>
+								<Typography variant="caption" sx={{ pl: 1 }} color='primary'>{t("damage__user_manual5c1")}<br/>{t("damage__user_manual5c2")}</Typography>
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual6")}</Typography>
 								{isAdmin && <Typography variant="body2" sx={{ pl: 1, mt: 1, color: "orangered", backgroundColor: "black" }}>{t("damage__user_manual_warning")}</Typography>}
 
@@ -666,28 +654,30 @@ const Home = () => {
 			</div>
 			<div className="section-footer">
 				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={2} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between">
-					<Table border={1} borderRadius={2} boxShadow={currentTheme.shadows[1]}>
-						<TableHead style={{backgroundColor: currentTheme.palette.background.default}}>
-							<TableRow>
-								<TableCell>보스명</TableCell>
-								<TableCell>{boss.name1 || t('damage__header__boss_1')}</TableCell>
-								<TableCell>{boss.name2 || t('damage__header__boss_2')}</TableCell>
-								<TableCell>{boss.name3 || t('damage__header__boss_3')}</TableCell>
-								<TableCell>{boss.name4 || t('damage__header__boss_4')}</TableCell>
-								<TableCell>{boss.name5 || t('damage__header__boss_5')}</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							<TableRow>
-								<TableCell>잔여 HP</TableCell>
-								<TableCell style={currentBossHp.hp1 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp1)}</TableCell>
-								<TableCell style={currentBossHp.hp2 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp2)}</TableCell>
-								<TableCell style={currentBossHp.hp3 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp3)}</TableCell>
-								<TableCell style={currentBossHp.hp4 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp4)}</TableCell>
-								<TableCell style={currentBossHp.hp5 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp5)}</TableCell>
-							</TableRow>
-						</TableBody>
-					</Table>
+					<TableContainer component={Paper} sx={{ borderRadius: '2' }}> {/* Apply border-radius here */}
+						<Table border={1} borderRadius={2} boxShadow={currentTheme.shadows[1]}>
+							<TableHead style={{backgroundColor: currentTheme.palette.background.default}}>
+								<TableRow>
+									<TableCell>{t('damage__header__boss_name')}</TableCell>
+									<TableCell>{boss.name1 || t('damage__header__boss_1')}</TableCell>
+									<TableCell>{boss.name2 || t('damage__header__boss_2')}</TableCell>
+									<TableCell>{boss.name3 || t('damage__header__boss_3')}</TableCell>
+									<TableCell>{boss.name4 || t('damage__header__boss_4')}</TableCell>
+									<TableCell>{boss.name5 || t('damage__header__boss_5')}</TableCell>
+								</TableRow>
+							</TableHead>
+							<TableBody>
+								<TableRow>
+									<TableCell>{t('damage__header__remaining')} HP</TableCell>
+									<TableCell style={currentBossHp.hp1 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp1)}</TableCell>
+									<TableCell style={currentBossHp.hp2 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp2)}</TableCell>
+									<TableCell style={currentBossHp.hp3 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp3)}</TableCell>
+									<TableCell style={currentBossHp.hp4 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp4)}</TableCell>
+									<TableCell style={currentBossHp.hp5 < 0 ? {color: 'orangered'} : {color : 'lightgray'}}>{formatNumber(currentBossHp.hp5)}</TableCell>
+								</TableRow>
+							</TableBody>
+						</Table>
+					</TableContainer>
 				</Grid>
 			</div>
 
