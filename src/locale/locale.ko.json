@@ -98,8 +98,8 @@
   "damage__user_manual3": "3. 모의전 결과 수정 버튼을 눌러 사용덱 및 모의전 점수를 저장합니다.",
   "damage__user_manual4": "4. 보스 정보가 없을 경우, 보스 정보 수정 버튼을 눌러 보스 정보를 저장합니다.",
   "damage__user_manual5": "5. 특정 보스를 클릭하면, 체력을 기반으로 추천 멤버가 하이라이트 됩니다.",
-  "damage__user_manual5c1": "* 하이라이트 멤버는 큰 점수 순으로 추천됩니다.",
-  "damage__user_manual5c2": "** 잔여 HP의 오버히트의 기본값은 10%이며, 더 정확한 딜계산을 위해서는 오버히트를 내리시기 바랍니다.",
+  "damage__user_manual5c1": "※ 추천 멤버는 큰 점수 순으로 선택됩니다.",
+  "damage__user_manual5c2": "※ 잔여 HP의 오버히트의 기본 비율은 10%이며, 더 정확한 딜계산을 위해서는 오버히트를 내리시기 바랍니다.",
   "damage__user_manual6": "6. 선택된 보스를 다시 클릭하거나 보스 정보창을 닫으면 추천 멤버 및 잔여 HP 표시가 초기화 됩니다.",
   "damage__user_manual_warning": "주의: 『보스 정보 초기화』 및 『모의전 결과 초기화』 버튼은 각각의 모든 데이터를 삭제합니다.",
 
@@ -109,6 +109,8 @@
   "damage__header__hard": "하드",
   "damage__header__level": "레벨",
   "damage__header__remaining": "잔여",
+  "damage__header__overheat": "오버히트",
+  "damage__header__rate": "비율",
 
   "analytic__header__file_name":"파일명",
   "analytic__header__anaysis_date":"분석 일시",

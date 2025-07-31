@@ -98,8 +98,8 @@
   "damage__user_manual3": "3. Click the Edit Simulation Result button to save your deck and simulation score.",
   "damage__user_manual4": "4. If there is no boss information, click the Edit Boss Info button to save boss details.",
   "damage__user_manual5": "5. Clicking a specific boss will highlight recommended members based on remaining HP.",
-  "damage__user_manual5c1": "* Recommended members are suggested by highest score.",
-  "damage__user_manual5c2": "** Default overhit rate for remaining HP is 10% and lower the overheat for more accurate calculations.",
+  "damage__user_manual5c1": "※ Recommended members are selected by highest score.",
+  "damage__user_manual5c2": "※ Default overhit rate for remaining HP is 10% and lower the overheat for more accurate calculations.",
   "damage__user_manual6": "6. Clicking the selected boss again or closing the boss info window will reset the recommended members and remaining HP display.",
   "damage__user_manual_warning": "Warning: The 'Reset Boss Info' and 'Reset Simulation Result' buttons will delete all respective data.",
 
@@ -109,6 +109,8 @@
   "damage__header__hard": "Hard",
   "damage__header__level": "Level",
   "damage__header__remaining": "Remaining",
+  "damage__header__overheat": "Overheat",
+  "damage__header__rate": "Rate",
 
   "analytic__header__file_path":"File Path",
   "analytic__header__file_name":"File Name",

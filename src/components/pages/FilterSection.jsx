@@ -15,7 +15,7 @@ const FilterSection = ({ onFilterChange, rowfilters }) => {
                     <FormGroup>
                         <Box display="flex" alignItems="center" justifyContent="left" pl={2} pr={2} pt={1} pb={1}>
                             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                                <InputLabel>{t('search__condition__union')} 오버히트</InputLabel>
+                                <InputLabel>{t('damage__header__overheat')} {t('damage__header__rate')}</InputLabel>
                                 <NativeSelect
                                     name="overheat"
                                     value={rowfilters.overheat}
