@@ -7,19 +7,16 @@ const UserContext = React.createContext();
 export const UserProvider = ({ children }) => {
 	const [userInfo, setUserInfo] = React.useState({ isLogin: false, email: '', name: '' });
   	const [isLogin, setIsLogin] = React.useState(false);
+	const [isAdmin, setIsAdmin] = React.useState(false);
 	const navigate = useNavigate();
 
 	React.useEffect(() => {
 		const getUserInfo = async () => {
         	const userData = await gateway.userInfo();
-        	if (userData && userData.isLogin) {
-          		setUserInfo(userData);
-          		setIsLogin(true);
-			// } else {
-			// 	setUserInfo(userData);
-			// 	setIsLogin(false);
-			// 	navigate("/");
-			}
+
+			setUserInfo(userData);
+			setIsLogin(userData.isLogin);
+			setIsAdmin(userData.isAdmin);
 	    };
 
 	    getUserInfo();
@@ -27,7 +24,7 @@ export const UserProvider = ({ children }) => {
 	  }, [navigate]);
 
   return (
-	<UserContext.Provider value={{ userInfo, isLogin }}>
+	<UserContext.Provider value={{ userInfo, isLogin, isAdmin }}>
 		{children}
     </UserContext.Provider>
   );

@@ -17,8 +17,8 @@ const FilterSection = ({ onFilterChange, rowfilters }) => {
                             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
                                 <InputLabel>{t('search__condition__union')}</InputLabel>
                                 <NativeSelect
-                                    name="union"
-                                    value={rowfilters.union}
+                                    name="unionName"
+                                    value={rowfilters.unionName}
                                     onChange={onFilterChange}
                                 >
                                     <option value={'expert'}>{t('search__condition__union_expert')}</option>

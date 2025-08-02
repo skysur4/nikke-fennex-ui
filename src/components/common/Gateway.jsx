@@ -147,9 +147,8 @@ export const check = async(path, opts) => {
 }
 
 export const userInfo = async () => {
-	const admins = ["꿍디빵디", "마이농◆", "플러시◆"]
-	let result = { isLogin : false };
-
+	const admins = ["꿍디빵디", "띨띨한지휘관", "존자르헌호", "승건◆", "훈민◆", "은화영♧", "아우우아우웅♧", "삼백억test"]
+	let result = { isLogin : false, name: null, userId: null, isAdmin: false };
 	await axios.get(userinfoUrl, defaultOptions)
 		.then((response) =>	{
 			if (response.data && response.data.status) {

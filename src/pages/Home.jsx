@@ -67,13 +67,16 @@ const Home = () => {
 	const [rows, setRows] = React.useState([]);
 	const [highlightRowIndex, setHighlightRowIndex] = React.useState([]);
 	const [collapseBoss, setCollapseBoss] = React.useState(true);
-	const [collapseManual, setCollapseManual] = React.useState(false);
+	const [collapseManual, setCollapseManual] = React.useState(true);
   	const [alertText, setAlertText] = React.useState('');
 	const [isAlertVisible, setIsAlertVisible] = React.useState(false);
+	const [loading, setLoading] = React.useState(false);
 
 	const [simulation, setSimulation] = React.useState({
 		userId: null,
 		nickname: null,
+		unionName: null,
+		level: 1,
 		boss1: null,
 		boss2: null,
 		boss3: null,
@@ -106,8 +109,7 @@ const Home = () => {
 					setSimulation(response.data);
 				}
 				setSimulationDialogOpen(true);
-			}
-		);
+			});
 	};
 
 	const handleSimulationSave = async () => {
@@ -129,15 +131,29 @@ const Home = () => {
 			}
 		);
 	};
+
+	const handleSimulationReset = () => {
+		gateway.del('/api/v1/score/reset')
+			.then((response) =>  {
+					getScores();
+					handleSimulationDialogClose();
+					showAlert(t('alert__deleted'));
+				}
+			);
+	};
 	
     const getScores = async () => {
+		setLoading(true);
         const response = await gateway.get('/api/v1/score');
+
         if (response.data && response.data.length > 0){
 			
 			setRowData(response.data.map((row,index) => ({
 	          id: index+1,
 	          userId: row.userId,
 			  nickname: row.nickname,
+			  unionName: row.unionName,
+			  level: row.level,
 	          boss1: row.boss1,
 			  boss2: row.boss2,
 	          boss3: row.boss3,
@@ -155,9 +171,11 @@ const Home = () => {
 		} else {
 			setRowData([]);
 		}
+
+		setLoading(false);
     };
 
-	const [boss, setBoss] = React.useState({
+	const initBoss = {
 		level: '1',
 		name1: null,
 		name2: null,
@@ -169,7 +187,9 @@ const Home = () => {
 		hp3: 0,
 		hp4: 0,
 		hp5: 0,
-	});
+	};
+
+	const [boss, setBoss] = React.useState(initBoss);
 
 	const [currentBossHp, setCurrentBossHp] = React.useState({
 		hp1: 0,
@@ -209,7 +229,7 @@ const Home = () => {
 	const handleBossDelete = () => {
 		gateway.del('/api/v1/boss')
 			.then((response) =>  {
-				setBoss(response.data);
+				setBoss(initBoss);
 				handleBossDialogClose();
 				showAlert(t('alert__deleted'));
 			}
@@ -242,7 +262,7 @@ const Home = () => {
 
 	const [rowfilters, setRowfilters] = React.useState({
 		overheat: 1.10,
-		union: 'senior',
+		unionName: 'senior',
 	});
 	
 	const handleFilterChange = (event) => {
@@ -253,25 +273,9 @@ const Home = () => {
 	};
 
 	const handleRowFilter = () => {
-		let filteredRows;
-		if(rowfilters.union === 'expert'){
-			filteredRows = (rowData || []).filter(data => {
-				return !data.nickname.includes("◆") && !data.nickname.includes("♧");
-			});
-			
-		} else if(rowfilters.union === 'senior'){
-			filteredRows = (rowData || []).filter(data => {
-				return data.nickname.includes("◆");
-			});
-			
-		} else if(rowfilters.union === 'junior'){
-			filteredRows = (rowData || []).filter(data => {
-				return data.nickname.includes("♧");
-			});
-			
-		} else {
-			filteredRows = rowData;
-		}
+		const filteredRows = (rowData || []).filter(data => {
+			return data.unionName === rowfilters.unionName;
+		});
 
 		setRows(filteredRows);
 
@@ -533,7 +537,7 @@ const Home = () => {
 			<Alert text={alertText} visible={isAlertVisible} onClose={handleAlertClose} type="error"/>
 
 			<div className="section-header">
-				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={2} borderRadius={2} boxShadow={currentTheme.shadows[1]}>
+				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={1} borderRadius={2} boxShadow={currentTheme.shadows[1]}>
 					<Grid container item md={8} sm={12} flexDirection={'column'} justifyContent={'flex-start'}>
 						<Typography variant="h4" pb={1}>{t("home__title")}</Typography>
 						<Typography variant="caption" sx={{ pl: 1 }}>{t("home__description")}</Typography>
@@ -548,7 +552,8 @@ const Home = () => {
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual3")}</Typography>
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual4")}</Typography>
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual5")}</Typography>
-								<Typography variant="caption" sx={{ pl: 1 }} color='primary'>{t("damage__user_manual5c1")}<br/>{t("damage__user_manual5c2")}</Typography>
+								<Typography variant="caption" sx={{ pl: 1 }} color='primary'>{t("damage__user_manual5c1")}</Typography><br/>
+								<Typography variant="caption" sx={{ pl: 1 }} color='primary'>{t("damage__user_manual5c2")}</Typography>
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual6")}</Typography>
 								{isAdmin && <Typography variant="body2" sx={{ pl: 1, mt: 1, color: "orangered", backgroundColor: "black" }}>{t("damage__user_manual_warning")}</Typography>}
 
@@ -560,7 +565,7 @@ const Home = () => {
 						<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 							<Box display="flex" alignItems="center">
 								{ isLogin && isAdmin &&
-								<Button component={Link} color='warning' onClick={handleBossGet} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
+								<Button component={Link} color='warning' onClick={handleBossDelete} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
 								}
 							</Box>
 							{ isLogin &&
@@ -618,13 +623,13 @@ const Home = () => {
 			</div>
 
 			<div className="section-body">
-				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={2} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between">
+				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={1} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between">
 					<Grid item md={12} sm={12} xs={12}>
 						<Box className="item">
-							<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
+							<Box display="flex" alignItems="center" justifyContent="space-between">
 								<Box display="flex" alignItems="center">
 									{ isLogin && isAdmin &&
-									<Button component={Link} color='warning' onClick={handleBossGet} startIcon={<RestartAltIcon />}>{t('damage__simulation_result')} {t('btn__reset')}</Button>
+									<Button component={Link} color='warning' onClick={handleSimulationReset} startIcon={<RestartAltIcon />}>{t('damage__simulation_result')} {t('btn__reset')}</Button>
 									}
       							</Box>
       							{ isLogin &&
@@ -653,6 +658,7 @@ const Home = () => {
 							        slots={{
 							          noRowsOverlay: NoDataGrid,
 							        }}
+									loading={loading}
 								/>
 								<style>{`
 								.suggested-row {
@@ -665,22 +671,22 @@ const Home = () => {
 				</Grid>
 			</div>
 			<div className="section-footer">
-				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={2} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between">
+				<Grid container backgroundColor={currentTheme.palette.background.default + '50'} padding={1} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between">
 					<TableContainer component={Paper} sx={{ borderRadius: '2' }}> {/* Apply border-radius here */}
-						<Table border={1} borderRadius={2} boxShadow={currentTheme.shadows[1]}>
+						<Table border={1}>
 							<TableHead sx={{backgroundColor: currentTheme.palette.background.default }}>
-								<TableRow sx={{alignItems:'center'}}>
-									<TableCell sx={{textAlign:'center'}}>{t('damage__header__remaining')} HP</TableCell>
-									<TableCell sx={{textAlign:'center'}}>{boss.name1 || t('damage__header__boss_1')}</TableCell>
-									<TableCell sx={{textAlign:'center'}}>{boss.name2 || t('damage__header__boss_2')}</TableCell>
-									<TableCell sx={{textAlign:'center'}}>{boss.name3 || t('damage__header__boss_3')}</TableCell>
-									<TableCell sx={{textAlign:'center'}}>{boss.name4 || t('damage__header__boss_4')}</TableCell>
-									<TableCell sx={{textAlign:'center'}}>{boss.name5 || t('damage__header__boss_5')}</TableCell>
+								<TableRow>
+									<TableCell sx={{textAlign:'left'}}>{t('damage__header__remaining')} HP</TableCell>
+									<TableCell sx={{textAlign:'right'}}>{boss.name1 || t('damage__header__boss_1')}</TableCell>
+									<TableCell sx={{textAlign:'right'}}>{boss.name2 || t('damage__header__boss_2')}</TableCell>
+									<TableCell sx={{textAlign:'right'}}>{boss.name3 || t('damage__header__boss_3')}</TableCell>
+									<TableCell sx={{textAlign:'right'}}>{boss.name4 || t('damage__header__boss_4')}</TableCell>
+									<TableCell sx={{textAlign:'right'}}>{boss.name5 || t('damage__header__boss_5')}</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
 								<TableRow>
-									<TableCell sx={{textAlign:'center'}}>{t('damage__header__overheat')} ({(rowfilters.overheat * 100 - 100).toFixed(0)}%)</TableCell>
+									<TableCell sx={{textAlign:'left'}}>{t('damage__header__overheat')} ({(rowfilters.overheat * 100 - 100).toFixed(0)}%)</TableCell>
 									<TableCell sx={{textAlign:'right', color: currentBossHp.hp1 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp1)}</TableCell>
 									<TableCell sx={{textAlign:'right', color: currentBossHp.hp2 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp2)}</TableCell>
 									<TableCell sx={{textAlign:'right', color: currentBossHp.hp3 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp3)}</TableCell>
