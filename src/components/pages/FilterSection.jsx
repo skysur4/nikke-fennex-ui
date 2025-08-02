@@ -34,7 +34,7 @@ const FilterSection = ({ onFilterChange, rowfilters }) => {
                     <FormGroup>
                         <Box display="flex" alignItems="center" justifyContent="right" pl={2} pr={2} pt={1} pb={1}>
                             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                                <InputLabel>{t('damage__header__overheat')} {t('damage__header__rate')}</InputLabel>
+                                <InputLabel>{t('damage__header__overheat')}</InputLabel>
                                 <NativeSelect
                                     name="overheat"
                                     value={rowfilters.overheat}
@@ -43,6 +43,9 @@ const FilterSection = ({ onFilterChange, rowfilters }) => {
                                     <option value={1.00}>0%</option>
                                     <option value={1.05}>5%</option>
                                     <option value={1.10}>10%</option>
+                                    <option value={100000000}>100,000,000</option>
+                                    <option value={150000000}>150,000,000</option>
+                                    <option value={200000000}>200,000,000</option>
                                 </NativeSelect>
                             </FormControl>
                         </Box>

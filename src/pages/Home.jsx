@@ -328,7 +328,7 @@ const Home = () => {
 
 			const bossId = clickedElement.dataset.boss;
 
-			let bossHP = boss[`hp${bossId}`];
+			let bossHP = parseInt(boss[`hp${bossId}`]);
 
 			const sortedRows = [...rows].sort((a, b) => {
 				const aDamage = parseInt(a[`boss${bossId}`]) || 0;
@@ -338,8 +338,12 @@ const Home = () => {
 
 			const suggestedPlayer = sortedRows.filter(row => {
 				const playerDamage = parseInt(row[`boss${bossId}`]) || 0;
+				const overheat = parseFloat(rowfilters.overheat);
+				const overheatHP = overheat > 2 ? bossHP + overheat : bossHP * overheat;
 
-				if(bossHP > 0 && bossHP * rowfilters.overheat >= playerDamage ){
+				console.log(overheatHP);
+
+				if(bossHP > 0 && overheatHP >= playerDamage ){
 					// 해당 플레이어가 보스의 남은 체력보다 적은 피해를 입혔을 경우
 					bossHP = bossHP - playerDamage;
 
@@ -367,6 +371,7 @@ const Home = () => {
 		if(selectedBossRef.current) {
 			setSuggestedPlayers(rowIds);
 			clickedElement = selectedBossRef.current;
+			rowfilters.overheat = 1.00;
 
 		} else {
 			setSuggestedPlayers([]);
@@ -712,7 +717,10 @@ const Home = () => {
 							</TableHead>
 							<TableBody>
 								<TableRow>
-									<TableCell sx={{textAlign:'left'}}>{t('damage__header__overheat')} ({(rowfilters.overheat * 100 - 100).toFixed(0)}%)</TableCell>
+									<TableCell sx={{textAlign:'left'}}>
+										{t('damage__header__overheat')}
+										&nbsp;({(rowfilters.overheat > 2 ? (rowfilters.overheat / 100000000).toFixed(1) + "억" : (rowfilters.overheat * 100 - 100).toFixed(0) + "%")})
+									</TableCell>
 									<TableCell sx={{textAlign:'right', color: currentBossHp.hp1 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp1)}</TableCell>
 									<TableCell sx={{textAlign:'right', color: currentBossHp.hp2 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp2)}</TableCell>
 									<TableCell sx={{textAlign:'right', color: currentBossHp.hp3 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp3)}</TableCell>
