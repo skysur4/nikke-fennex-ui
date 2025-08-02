@@ -568,7 +568,7 @@ const Home = () => {
 								<Button component={Link} color='warning' onClick={handleBossDelete} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
 								}
 							</Box>
-							{ isLogin &&
+							{ isLogin && isAdmin &&
 							<Button component={Link} color='primary' onClick={handleBossGet} startIcon={<UpgradeIcon />}>{t('damage__title__boss_information')} {t('btn__update')}</Button>
 							}
 						</Box>
