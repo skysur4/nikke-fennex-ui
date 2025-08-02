@@ -88,7 +88,7 @@
   "damage__header__total":"합계",
   "damage__header__updated_at":"수정일시",
   "damage__header__save_remove":"저장/삭제",
-  "damage__add_edit_delete_simulation" : "모의전 추가/수정/삭제",
+  "damage__my" : "나의",
   "damage__simulation_result" : "모의전 결과",
   "damage__hundred_million_unit": "억",
 

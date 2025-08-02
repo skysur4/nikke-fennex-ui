@@ -65,7 +65,7 @@ const Home = () => {
 
 	const [rowData, setRowData] = React.useState([]);
 	const [rows, setRows] = React.useState([]);
-	const [highlightRowIndex, setHighlightRowIndex] = React.useState([]);
+	const [suggestedPlayers, setSuggestedPlayers] = React.useState([]);
 	const [collapseBoss, setCollapseBoss] = React.useState(true);
 	const [collapseManual, setCollapseManual] = React.useState(true);
   	const [alertText, setAlertText] = React.useState('');
@@ -304,7 +304,7 @@ const Home = () => {
 		// 추천 초기화
 		if(clickedElement.classList.contains('suggested-row')){
 			clickedElement.classList.remove('suggested-row');
-			setHighlightRowIndex([]);
+			setSuggestedPlayers([]);
 			selectedBossRef.current = null;
 
 			// 잔여 HP 항상 초기화
@@ -355,18 +355,42 @@ const Home = () => {
 				return false
 			});
 
-			setHighlightRowIndex(suggestedPlayer.map(player => player.id));
+			setSuggestedPlayers(suggestedPlayer.map(player => player.id));
 			selectedBossRef.current = clickedElement;
 
 		}
 	}
 
-	const getRowClassName = (params) => {
-		if (highlightRowIndex.includes(params.row.id)) {
-			return 'suggested-row';
+	const suggestPlayerManual = (rowIds) => {
+		let clickedElement;
+
+		if(selectedBossRef.current) {
+			setSuggestedPlayers(rowIds);
+			clickedElement = selectedBossRef.current;
+
+		} else {
+			setSuggestedPlayers([]);
+			return;
 		}
-		return '';
-	};
+
+		const bossId = clickedElement.dataset.boss;
+
+		let bossHP = boss[`hp${bossId}`];
+
+		const selectedRows = rows.filter(row => rowIds.includes(row.id));
+
+		// 선택된 데미지 차감
+		selectedRows.forEach(row => {
+			const playerDamage = parseInt(row[`boss${bossId}`]) || 0;
+			bossHP = bossHP - playerDamage;
+		});
+
+		// 잔여 HP 표시
+		setCurrentBossHp({
+			...currentBossHp,
+			[`hp${bossId}`]: bossHP,
+		});
+	}
 
 	const showAlert = (message) => {
 		setAlertText(message);
@@ -629,11 +653,11 @@ const Home = () => {
 							<Box display="flex" alignItems="center" justifyContent="space-between">
 								<Box display="flex" alignItems="center">
 									{ isLogin && isAdmin &&
-									<Button component={Link} color='warning' onClick={handleSimulationReset} startIcon={<RestartAltIcon />}>{t('damage__simulation_result')} {t('btn__reset')}</Button>
+									<Button component={Link} color='warning' onClick={handleSimulationReset} startIcon={<RestartAltIcon />}>{t('search__condition__union')} {t('damage__simulation_result')} {t('btn__reset')}</Button>
 									}
       							</Box>
       							{ isLogin &&
-								<Button component={Link} color='primary' onClick={handleSimulationGet} startIcon={<ScoreIcon />}>{t('damage__simulation_result')} {t('btn__update')}</Button>
+								<Button component={Link} color='primary' onClick={handleSimulationGet} startIcon={<ScoreIcon />}>{t('damage__my')} {t('damage__simulation_result')} {t('btn__update')}</Button>
 								}
 							</Box>
 
@@ -646,7 +670,6 @@ const Home = () => {
 								<DataGrid
 									rows={rows}
 									columns={columns}
-									getRowClassName={getRowClassName}
 									initialState={{
 										pagination: {
 											paginationModel: {
@@ -658,6 +681,9 @@ const Home = () => {
 							        slots={{
 							          noRowsOverlay: NoDataGrid,
 							        }}
+									checkboxSelection
+									rowSelectionModel={suggestedPlayers}
+									onRowSelectionModelChange={suggestPlayerManual}
 									loading={loading}
 								/>
 								<style>{`
@@ -709,7 +735,7 @@ const Home = () => {
 			  maxWidth="xs"
 			>
 				<DialogTitle id="alert-dialog-title">
-					{t('damage__simulation_result')}
+					{t('damage__my')} {t('damage__simulation_result')}
 				</DialogTitle>
 				<DialogContent>
 					<DialogContentText item xs={8} md={12} sm={12} className="edit-form">
