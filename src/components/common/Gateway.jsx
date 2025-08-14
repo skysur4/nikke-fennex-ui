@@ -147,7 +147,6 @@ export const check = async(path, opts) => {
 }
 
 export const userInfo = async () => {
-	const admins = ["꿍디빵디", "띨띨한지휘관", "존자르헌호", "승건◆", "그레텔◆", "은화영♧", "아우우아우웅♧", "삼백억test"]
 	let result = { isLogin : false, name: null, union: null, userId: null, isAdmin: false };
 
 	await axios.get(userinfoUrl, defaultOptions)
@@ -163,7 +162,7 @@ export const userInfo = async () => {
 				} else {
 					union = "expert";
 				}
-				result = { isLogin: data.status, name: data.nickName, union: union, userId: data.id, isAdmin: admins.includes(data.nickName) };
+				result = { isLogin: data.status, name: data.nickName, union: union, userId: data.id, isAdmin: data.admin };
 
 				console.log(result);
 			}

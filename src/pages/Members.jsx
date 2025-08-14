@@ -2,8 +2,8 @@ import React from 'react';
 import {useTheme} from '@mui/material/styles';
 import {
 	Box,
-	Button, Checkbox, Chip,
-	Grid, IconButton,
+	Button, Checkbox,
+	Grid,
 	Typography,
 } from "@mui/material";
 
@@ -41,8 +41,6 @@ import NoDataGrid from '@components/common/NoDataGrid';
 import {useUser} from '@components/common/UserContext';
 import * as gateway from '@components/common/Gateway';
 import Alert from '@components/ui/Alert';
-import UpgradeIcon from "@mui/icons-material/Upgrade";
-
 
 const Members = () => {
 	const currentTheme = useTheme();
@@ -170,6 +168,7 @@ const Members = () => {
 						{params.row.isNew &&
 							<GridActionsCellItem
 								icon={<SaveAsIcon/>}
+								color={"primary"}
 								label="Save"
 								data-id={params.row.id}
 								data-nickname={params.row.nickname}
@@ -178,6 +177,7 @@ const Members = () => {
 					</>,
 					<GridActionsCellItem
 						icon={<DeleteIcon />}
+						color={"warning"}
 						label="Delete"
 						data-id={params.row.id}
 						data-created={params.row.isNew}
@@ -392,7 +392,7 @@ const Members = () => {
 		handleMembersSave(param);
 	}
 
-	const handleSynchronize = async () => {
+	const handleSyncronize = async () => {
 		const msg = t("confirm__sync_simulation_proceed");
 		if(window.confirm(msg)) {
 			gateway.post(`/api/v1/members/auto`)
@@ -455,7 +455,7 @@ const Members = () => {
 						<Box className="item">
 							<Box display="flex" alignItems="center" justifyContent="space-between" pb={1}>
 								<Button variant="contained" color='warning' onClick={handleMembersReset} startIcon={<RestartAltIcon />}>{t('search__condition__union')} {t('search__condition__member')} {t('btn__reset')}</Button>
-								<Button color='success' variant="contained" onClick={handleSynchronize} startIcon={<SyncIcon />}>{t('search__condition__union')} {t('search__condition__member')} {t('member__synchronize')}</Button>
+								<Button color='success' variant="contained" onClick={handleSyncronize} startIcon={<SyncIcon />}>{t('search__condition__union')} {t('search__condition__member')} {t('member__synchronize')}</Button>
 								<Button color='primary' variant="contained" onClick={handleAddRow} startIcon={<RegistrIcon />}>{t('search__condition__union')} {t('search__condition__member')} {t('btn__add')}</Button>
 							</Box>
 

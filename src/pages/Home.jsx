@@ -261,7 +261,7 @@ const Home = () => {
 	};
 
 	const handleBossDelete = () => {
-		const msg = t('damage__title__boss_information') + ' ' + t('damage__header__level') + ' [' + bossLevelRef.current + '] ' + '\n' + t('confirm__proceed_reset');
+		const msg = t('damage__title__boss_information') + ' ' + t('damage__header__level') + ' [' + bossLevelRef.current + '] ' + t('confirm__proceed_reset');
 		if(window.confirm(msg)) {
 			gateway.del(`/api/v1/boss/${bossLevelRef.current}`)
 				.then((response) => {
@@ -589,7 +589,7 @@ const Home = () => {
 					</Grid>
 
 					<Grid container item md={4} sm={12} flexDirection={'column'} justifyContent="flex-end">
-						<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
+						<Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
 							<Box display="flex" alignItems="center">
 								{ isLogin && isAdmin &&
 								<Button color='warning' variant="contained" onClick={handleBossDelete} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
@@ -599,7 +599,7 @@ const Home = () => {
 							<Button color='primary' variant="contained" onClick={handleBossDialogOpen} startIcon={<UpgradeIcon />}>{t('damage__title__boss_information')} {t('btn__update')}</Button>
 							}
 						</Box>
-						<List component="div" disablePadding sx={{ width: '100%' }}>
+						<List component="div" disablePadding sx={{ width: '100%' }} mb={1}>
 							<ListItemButton onClick={handleCollapseBoss}>
 								{collapseBoss ? <ExpandLess /> : <ExpandMore />}
 								<ListItemText primary={t("damage__title__boss_information")} />
@@ -647,7 +647,7 @@ const Home = () => {
 							</Collapse>
 						</List>
 
-						<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
+						<Box display="flex" alignItems="center" justifyContent="space-between" m={1}>
 							<ToggleButtonGroup
 								color="primary"
 								value={bossLevel}
