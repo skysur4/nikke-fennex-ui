@@ -12,7 +12,7 @@ import { I18nextProvider } from 'react-i18next';
 function App() {
 	const currentTheme = useTheme();
 	const isDarkMode = useMediaQuery('(prefers-color-scheme: dark)'); // 사용자 시스템 환경에 따른 모드
-	const isMobile = useMediaQuery(currentTheme.breakpoints.down('sm'));
+	const isMobile = useMediaQuery(currentTheme.breakpoints.down('md'));
 
 	const theme = React.useMemo(
 	  () =>

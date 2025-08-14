@@ -37,11 +37,11 @@ export default function BaseLayout() {
 					height: '100vh',
 					justifyContent: 'space-between',
 					flexDirection: 'column',
-					backgroundImage: `url("https://sg-cdn.blablalink.com/standalonesite/ugc/public/image/a2248344-7b9d-4d21-92af-981b694395c5.jpeg?height=1080&width=1920")`,
 					backgroundSize: 'cover', // Optional: Adjust to your needs
 					backgroundColor: `rgb(20, 21, 78)`,
 					backgroundPosition: 'center',
 					backgroundRepeat: 'no-repeat',
+					backgroundImage: `url("https://sg-cdn.blablalink.com/standalonesite/ugc/public/image/b22557fb-ebe2-4486-ac9b-6819e9f2a0d5.jpeg?height=1080&width=1920")`
 				}}
 
 			>

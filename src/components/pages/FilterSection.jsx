@@ -1,19 +1,21 @@
 import React from 'react';
-import { Box, FormControl, FormGroup, Grid, InputLabel, NativeSelect } from '@mui/material';
+import {Box, Button, FormControl, FormGroup, Grid, InputLabel, NativeSelect} from '@mui/material';
 
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from "react-i18next";
 
-const FilterSection = ({ onFilterChange, rowfilters }) => {
+import ReplayIcon from '@mui/icons-material/Replay';
+
+const FilterSection = ({ onFilterChange, rowfilters, onClickReload }) => {
     const currentTheme = useTheme();
     const { t } = useTranslation();
 
     return (
         <div className="section-filter">
-            <Grid container backgroundColor={currentTheme.palette.background.default + '50'} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between">
-                <Grid item md={6} sm={6} xs={6}>
+            <Grid container backgroundColor={currentTheme.palette.background.default + '50'} borderRadius={2} boxShadow={currentTheme.shadows[1]} justifyContent="space-between" alignItems={"baseline"}>
+                <Grid item md={6}>
                     <FormGroup>
-                        <Box display="flex" alignItems="center" justifyContent="left" pl={2} pr={2} pt={1} pb={1}>
+                        <Box display="flex">
                             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
                                 <InputLabel>{t('search__condition__union')}</InputLabel>
                                 <NativeSelect
@@ -30,23 +32,16 @@ const FilterSection = ({ onFilterChange, rowfilters }) => {
                     </FormGroup>
                 </Grid>
 
-                <Grid item md={6} sm={6} xs={6}>
+                <Grid item md={6}>
                     <FormGroup>
-                        <Box display="flex" alignItems="center" justifyContent="right" pl={2} pr={2} pt={1} pb={1}>
+                        <Box display="flex" justifyContent="right" id={"test"}>
                             <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-                                <InputLabel>{t('damage__header__overheat')}</InputLabel>
-                                <NativeSelect
-                                    name="overheat"
-                                    value={rowfilters.overheat}
-                                    onChange={onFilterChange}
-                                >
-                                    <option value={1.00}>0%</option>
-                                    <option value={1.05}>5%</option>
-                                    <option value={1.10}>10%</option>
-                                    <option value={100000000}>100,000,000</option>
-                                    <option value={150000000}>150,000,000</option>
-                                    <option value={200000000}>200,000,000</option>
-                                </NativeSelect>
+                                <Button
+                                    variant="outlined"
+                                    endIcon={<ReplayIcon />}
+                                    onClick={onClickReload}
+                                >Reload
+                                </Button>
                             </FormControl>
                         </Box>
                     </FormGroup>

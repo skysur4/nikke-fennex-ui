@@ -147,14 +147,25 @@ export const check = async(path, opts) => {
 }
 
 export const userInfo = async () => {
-	const admins = ["꿍디빵디", "띨띨한지휘관", "존자르헌호", "승건◆", "훈민◆", "은화영♧", "아우우아우웅♧", "삼백억test"]
-	let result = { isLogin : false, name: null, userId: null, isAdmin: false };
+	const admins = ["꿍디빵디", "띨띨한지휘관", "존자르헌호", "승건◆", "그레텔◆", "은화영♧", "아우우아우웅♧", "삼백억test"]
+	let result = { isLogin : false, name: null, union: null, userId: null, isAdmin: false };
+
 	await axios.get(userinfoUrl, defaultOptions)
 		.then((response) =>	{
 			if (response.data && response.data.status) {
 				const data = response.data;
-				console.log(data);
-				result = { isLogin: data.status, name: data.nickName, userId: data.id, isAdmin: admins.includes(data.nickName) };
+				const postfix = data.nickName.replace(/[^◆♧]/g, "");
+				let union = "";
+				if("◆" === postfix){
+					union = "senior";
+				} else if("♧" === postfix){
+					union = "junior";
+				} else {
+					union = "expert";
+				}
+				result = { isLogin: data.status, name: data.nickName, union: union, userId: data.id, isAdmin: admins.includes(data.nickName) };
+
+				console.log(result);
 			}
 		}).catch((error)=>{
 			console.log(error);

@@ -1,7 +1,6 @@
-import React from 'react';
-import { Link } from "react-router-dom";
+import React, {Fragment} from 'react';
+import parse from 'html-react-parser';
 import { useTheme } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
 import {
 	Box,
 	Button,
@@ -38,6 +37,7 @@ import Filter4Icon from '@mui/icons-material/Filter4';
 import Filter5Icon from '@mui/icons-material/Filter5';
 import UpgradeIcon from '@mui/icons-material/Upgrade';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import CalculateIcon from '@mui/icons-material/Calculate';
 
 // custom
 import {useTranslation} from "react-i18next";
@@ -46,49 +46,42 @@ import { useUser } from '@components/common/UserContext';
 import * as gateway from '@components/common/Gateway';
 import Alert from '@components/ui/Alert';
 import {roundToDecimalPlaces} from "@mui/x-data-grid/utils/roundToDecimalPlaces";
+import {ToggleButton, ToggleButtonGroup} from "@mui/lab";
 
 const Home = () => {
 	const currentTheme = useTheme();
 	const { userInfo, isLogin, isAdmin } = useUser();
 	const { t } = useTranslation();
 
-	const useStyles = makeStyles({
-		tableCell: {
-			textAlign: 'center',
-			alignItems: 'center',
-			// borderRight: 'rgba(224, 224, 224, 1)', // Add a right border to each cell
-			// '&:last-child': {
-			// 	borderRight: 'none', // Remove the border from the last cell in a row
-			// },
-		},
-	});
-
-	const [rowData, setRowData] = React.useState([]);
+	const [rawData, setRawData] = React.useState([]);
 	const [rows, setRows] = React.useState([]);
-	const [suggestedPlayers, setSuggestedPlayers] = React.useState([]);
 	const [collapseBoss, setCollapseBoss] = React.useState(true);
 	const [collapseManual, setCollapseManual] = React.useState(true);
-  	const [alertText, setAlertText] = React.useState('');
-	const [isAlertVisible, setIsAlertVisible] = React.useState(false);
 	const [loading, setLoading] = React.useState(false);
 
-	const [simulation, setSimulation] = React.useState({
-		userId: null,
-		nickname: null,
-		unionName: null,
-		level: 1,
-		boss1: null,
-		boss2: null,
-		boss3: null,
-		boss4: null,
-		boss5: null,
-		deck1: null,
-		deck2: null,
-		deck3: null,
-		deck4: null,
-		deck5: null,
-	});
+	const simulationIndexes= [1, 2, 3, 4, 5, 6, 7, 8, 9];
+	const simulationIndexRef = React.useRef(1);
 
+	const initSimulation = {
+		userId: '',
+		nickname: '',
+		unionName: '',
+		level: '',
+		index: '',
+		boss1: '',
+		boss2: '',
+		boss3: '',
+		boss4: '',
+		boss5: '',
+		deck1: '',
+		deck2: '',
+		deck3: '',
+		deck4: '',
+		deck5: '',
+		memo: '',
+	}
+
+	const [simulation, setSimulation] = React.useState(initSimulation);
 	const [simulationDialogOpen, setSimulationDialogOpen] = React.useState(false);
 
 	const handleSimulationChange = (e) => {
@@ -98,22 +91,44 @@ const Home = () => {
 		});
 	};
 
+	const getScore = () => {
+		return gateway.get(`/api/v1/score/${bossLevelRef.current}/${simulationIndexRef.current}`)
+			.then((response) =>  {
+				if( response && response.data) {
+					setSimulation(response.data);
+				} else {
+					setSimulation(initSimulation);
+				}
+				return true;
+			}).catch((error) => {
+				console.log(error);
+				return false;
+			});
+	};
+
+	const handleSimulationIndexChange = (e, newIndex) => {
+		simulationIndexRef.current = newIndex ? newIndex : e.currentTarget.value;
+		getScore();
+	}
+
   	const handleSimulationDialogClose = () => {
  		setSimulationDialogOpen(false);
 	};
 
-	const handleSimulationGet = () => {
-		gateway.get(`/api/v1/score/${userInfo.userId}`)
-			.then((response) =>  {
-				if( response && response.data) {
-					setSimulation(response.data);
-				}
-				setSimulationDialogOpen(true);
-			});
+	const handleSimulationDialogOpen = () => {
+		if(getScore()){
+			setSimulationDialogOpen(true);
+		}
 	};
 
 	const handleSimulationSave = async () => {
-		gateway.post('/api/v1/score', simulation)
+		const params = {
+			...simulation
+			, 'level': bossLevelRef.current
+			, 'index': simulationIndexRef.current
+		};
+
+		gateway.post(`/api/v1/score`, params)
 			.then((response) =>  {
 				getScores();
 				handleSimulationDialogClose();
@@ -123,7 +138,7 @@ const Home = () => {
 	};
 
 	const handleSimulationDelete = () => {
-		gateway.del('/api/v1/score')
+		gateway.del(`/api/v1/score/${bossLevelRef.current}/${simulationIndexRef.current}`)
 			.then((response) =>  {
 				getScores();
 				handleSimulationDialogClose();
@@ -133,65 +148,74 @@ const Home = () => {
 	};
 
 	const handleSimulationReset = () => {
-		gateway.del('/api/v1/score/reset')
-			.then((response) =>  {
-					getScores();
-					handleSimulationDialogClose();
-					showAlert(t('alert__deleted'));
-				}
-			);
+		const msg = t('damage__simulation_result') + ' [' + t('search__condition__union_' + userInfo.union) + '] \n' + t('confirm__proceed_reset');
+		if(window.confirm(msg)) {
+			gateway.del('/api/v1/score/reset')
+				.then((response) =>  {
+						getScores();
+						handleSimulationDialogClose();
+						showAlert(t('alert__deleted'));
+					}
+				);
+		}
 	};
 	
     const getScores = async () => {
 		setLoading(true);
-        const response = await gateway.get('/api/v1/score');
+        const response = await gateway.get(`/api/v1/score/${bossLevelRef.current}`);
 
-        if (response.data && response.data.length > 0){
+        if (response && response.data && response.data.length > 0){
 			
-			setRowData(response.data.map((row,index) => ({
-	          id: index+1,
-	          userId: row.userId,
-			  nickname: row.nickname,
-			  unionName: row.unionName,
-			  level: row.level,
-	          boss1: row.boss1,
-			  boss2: row.boss2,
-	          boss3: row.boss3,
-			  boss4: row.boss4,
-	          boss5: row.boss5,
-			  deck1: row.deck1,
-	          deck2: row.deck2,
-			  deck3: row.deck3,
-	          deck4: row.deck4,
-			  deck5: row.deck5,
-	          updatedAt: row.updatedAt || '-',
-			  isNew: false,
+			setRawData(response.data.map((row,index) => ({
+	        	id: index+1,
+	        	userId: row.userId,
+				nickname: row.nickname,
+				unionName: row.unionName,
+				level: row.level,
+				index: row.index,
+	        	boss1: row.boss1,
+				boss2: row.boss2,
+	        	boss3: row.boss3,
+				boss4: row.boss4,
+	        	boss5: row.boss5,
+				deck1: row.deck1,
+	        	deck2: row.deck2,
+				deck3: row.deck3,
+	        	deck4: row.deck4,
+				deck5: row.deck5,
+				memo: row.memo,
+	        	updatedAt: row.updatedAt || '-',
+				isNew: false,
 			})));
 
 		} else {
-			setRowData([]);
+			setRawData([]);
 		}
+
+		handleRowFilter();
 
 		setLoading(false);
     };
 
 	const initBoss = {
-		level: '1',
-		name1: null,
-		name2: null,
-		name3: null,
-		name4: null,
-		name5: null,
-		hp1: 0,
-		hp2: 0,
-		hp3: 0,
-		hp4: 0,
-		hp5: 0,
+		name1: '',
+		name2: '',
+		name3: '',
+		name4: '',
+		name5: '',
+		hp1: '',
+		hp2: '',
+		hp3: '',
+		hp4: '',
+		hp5: '',
 	};
 
 	const [boss, setBoss] = React.useState(initBoss);
+	const bossLevels = [ 1, 2, 3 ];
+	const [bossLevel, setBossLevel] = React.useState(1);
+	const bossLevelRef= React.useRef(1);
 
-	const [currentBossHp, setCurrentBossHp] = React.useState({
+	const [scoreSum, setScoreSum] = React.useState({
 		hp1: 0,
 		hp2: 0,
 		hp3: 0,
@@ -200,6 +224,11 @@ const Home = () => {
 	});
 	
 	const [bossDialogOpen, setBossDialogOpen] = React.useState(false);
+
+	const handleBossLevel = (e, newLevel) => {
+		setBossLevel(newLevel ? newLevel : e.currentTarget.value); //UI 처리
+		bossLevelRef.current = newLevel ? newLevel : e.currentTarget.value; //DATA 처리
+	}
 
 	const handleBossChange = (e) => {
 		setBoss({
@@ -212,13 +241,18 @@ const Home = () => {
  		setBossDialogOpen(false);
 	};
 
-	const handleBossGet = () => {
+	const handleBossDialogOpen = () => {
 		getBossInfo();
 		setBossDialogOpen(true);
 	};
 
 	const handleBossSave = async () => {
-		gateway.post('/api/v1/boss', boss)
+		const params = {
+			...boss
+			, 'level': bossLevelRef.current
+		};
+
+		gateway.post(`/api/v1/boss`, params)
 			.then((response) =>  {
 				setBoss(response.data);
 				handleBossDialogClose();
@@ -227,19 +261,24 @@ const Home = () => {
 	};
 
 	const handleBossDelete = () => {
-		gateway.del('/api/v1/boss')
-			.then((response) =>  {
-				setBoss(initBoss);
-				handleBossDialogClose();
-				showAlert(t('alert__deleted'));
-			}
-		);
+		const msg = t('damage__title__boss_information') + ' ' + t('damage__header__level') + ' [' + bossLevelRef.current + '] ' + '\n' + t('confirm__proceed_reset');
+		if(window.confirm(msg)) {
+			gateway.del(`/api/v1/boss/${bossLevelRef.current}`)
+				.then((response) => {
+						setBoss(initBoss);
+						handleBossDialogClose();
+						showAlert(t('alert__deleted'));
+					}
+				);
+		}
 	};
 	
     const getBossInfo = async () => {
-        const response = await gateway.get(`/api/v1/boss/${boss.level}`);
-        if (response.data){
+        const response = await gateway.get(`/api/v1/boss/${bossLevelRef.current}`);
+        if (response && response.data){
 			setBoss(response.data);
+		} else {
+			setBoss(initBoss);
 		}
     };
 
@@ -252,8 +291,6 @@ const Home = () => {
 
 	const handleCollapseBoss = () => {
 		setCollapseBoss(!collapseBoss);
-
-		suggestPlayer();
 	};
 
 	const handleCollapseManual = () => {
@@ -261,7 +298,6 @@ const Home = () => {
 	};
 
 	const [rowfilters, setRowfilters] = React.useState({
-		overheat: 1.10,
 		unionName: 'senior',
 	});
 	
@@ -273,145 +309,68 @@ const Home = () => {
 	};
 
 	const handleRowFilter = () => {
-		const filteredRows = (rowData || []).filter(data => {
+		const filteredRows = (rawData || []).filter(data => {
 			return data.unionName === rowfilters.unionName;
 		});
-
 		setRows(filteredRows);
-
-		suggestPlayer();
 	};
 
 	
 	React.useEffect(() => {
 		handleRowFilter();
-  	}, [rowData, rowfilters]);
+  	}, [rawData, rowfilters]);
 
-	const selectedBossRef = React.useRef(null);
-	const suggestPlayer = (event) => {
-		let clickedElement;
 
-		if(event){
-			clickedElement = event.currentTarget;
-
-		} else if(selectedBossRef.current) {
-			clickedElement = selectedBossRef.current;
-
-		} else {
-			return;
-		}
-
-		// 추천 초기화
-		if(clickedElement.classList.contains('suggested-row')){
-			clickedElement.classList.remove('suggested-row');
-			setSuggestedPlayers([]);
-			selectedBossRef.current = null;
-
-			// 잔여 HP 항상 초기화
-			setCurrentBossHp({
-				hp1: 0,
-				hp2: 0,
-				hp3: 0,
-				hp4: 0,
-				hp5: 0,
-			});
-
-		} else {
-			let parentElement = clickedElement.parentNode;
-			let siblings = Array.from(parentElement.children).filter(child => child !== clickedElement);
-
-			siblings.forEach(sibling => {
-				sibling.classList.remove('suggested-row');
-			});
-
-			clickedElement.classList.add('suggested-row');
-
-			const bossId = clickedElement.dataset.boss;
-
-			let bossHP = parseInt(boss[`hp${bossId}`]);
-
-			const sortedRows = [...rows].sort((a, b) => {
-				const aDamage = parseInt(a[`boss${bossId}`]) || 0;
-				const bDamage = parseInt(b[`boss${bossId}`]) || 0;
-				return bDamage - aDamage; // 내림차순 정렬
-			});
-
-			const suggestedPlayer = sortedRows.filter(row => {
-				const playerDamage = parseInt(row[`boss${bossId}`]) || 0;
-				const overheat = parseFloat(rowfilters.overheat);
-				const overheatHP = overheat > 2 ? bossHP + overheat : bossHP * overheat;
-
-				console.log(overheatHP);
-
-				if(bossHP > 0 && overheatHP >= playerDamage ){
-					// 해당 플레이어가 보스의 남은 체력보다 적은 피해를 입혔을 경우
-					bossHP = bossHP - playerDamage;
-
-					// 잔여 HP 표시
-					setCurrentBossHp({
-						...currentBossHp,
-						[`hp${bossId}`]: bossHP,
-					});
-
-					return true;
-				}
-
-				return false
-			});
-
-			setSuggestedPlayers(suggestedPlayer.map(player => player.id));
-			selectedBossRef.current = clickedElement;
-
-		}
-	}
-
-	const suggestPlayerManual = (rowIds) => {
-		let clickedElement;
-
-		if(selectedBossRef.current) {
-			setSuggestedPlayers(rowIds);
-			clickedElement = selectedBossRef.current;
-			rowfilters.overheat = 1.00;
-
-		} else {
-			setSuggestedPlayers([]);
-			return;
-		}
-
-		const bossId = clickedElement.dataset.boss;
-
-		let bossHP = boss[`hp${bossId}`];
-
+	/**
+	 * Row 클릭 이벤트 관리
+	 */
+	const sumScores = (rowIds) => {
 		const selectedRows = rows.filter(row => rowIds.includes(row.id));
 
-		// 선택된 데미지 차감
+		let playerDamage1 = 0;
+		let playerDamage2 = 0;
+		let playerDamage3 = 0;
+		let playerDamage4 = 0;
+		let playerDamage5 = 0;
+
+		// 선택된 데미지 누적
 		selectedRows.forEach(row => {
-			const playerDamage = parseInt(row[`boss${bossId}`]) || 0;
-			bossHP = bossHP - playerDamage;
+			playerDamage1 = playerDamage1 + (parseInt(row[`boss1`]) || 0);
+			playerDamage2 = playerDamage2 + (parseInt(row[`boss2`]) || 0);
+			playerDamage3 = playerDamage3 + (parseInt(row[`boss3`]) || 0);
+			playerDamage4 = playerDamage4 + (parseInt(row[`boss4`]) || 0);
+			playerDamage5 = playerDamage5 + (parseInt(row[`boss5`]) || 0);
 		});
 
-		// 잔여 HP 표시
-		setCurrentBossHp({
-			...currentBossHp,
-			[`hp${bossId}`]: bossHP,
+		// 점수 합산 표시
+		setScoreSum({
+			'hp1': playerDamage1,
+			'hp2': playerDamage2,
+			'hp3': playerDamage3,
+			'hp4': playerDamage4,
+			'hp5': playerDamage5
 		});
 	}
 
-	const showAlert = (message) => {
-		setAlertText(message);
-		setIsAlertVisible(true);
-	};
+	/**
+	 * 투입 관리
+	 */
+	const handleRaid = (e) => {
+		const data = e.currentTarget.dataset;
+		const boss = data.boss;
 
-	const handleAlertClose = () => {
-    	setIsAlertVisible(false);
-  	};
+		console.log(boss, 'level', bossLevelRef.current);
+	}
 
+	/**
+	 * Default hook
+	 */
 	React.useEffect(() => {
 		if (isLogin) {
 			getBossInfo();
 			getScores();
 		}
-  	}, [isLogin]);
+	}, [isLogin, bossLevel]);
 
 	const columns = React.useMemo(() => {
 		/**
@@ -428,138 +387,177 @@ const Home = () => {
 		 * 수정일시
 		 **/
 		const initialColumns = [
-		  {
-			field: 'userId',
-			headerName: t('damage__header__user_id'),
-		  },
-		  {
-		    field: 'nickname',
-		    headerName: t('damage__header__nickname'),
-			flex: 1,
-            minWidth: 50,
-			headerAlign: 'center',
-		  },
-		  {
-		    field: 'boss1',
-		    headerName: boss.name1 || t('damage__header__boss_1'),
-		    flex: 1,
-            minWidth: 50,
-			headerAlign: 'center',
-		    align: 'right',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-			valueGetter: (value, row) => value ? formatNumber(value) : 0,
-			renderCell: (params) => <Tooltip title={params.row.deck1}><span>{params.formattedValue}</span></Tooltip>,
-		  },
-		  {
-		    field: 'boss2',
-		    headerName: boss.name2 || t('damage__header__boss_2'),
-		    flex: 1,
-            minWidth: 50,
-			headerAlign: 'center',
-		    align: 'right',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-			valueGetter: (value, row) => value ? formatNumber(value) : 0,
-			renderCell: (params) => <Tooltip title={params.row.deck2}><span>{params.formattedValue}</span></Tooltip>,
-		  },
-		  {
-		    field: 'boss3',
-		    headerName: boss.name3 || t('damage__header__boss_3'),
-		    flex: 1,
-            minWidth: 50,
-			headerAlign: 'center',
-		    align: 'right',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-			valueGetter: (value, row) => value ? formatNumber(value) : 0,
-			renderCell: (params) => <Tooltip title={params.row.deck3}><span>{params.formattedValue}</span></Tooltip>,
-		  },
-		  {
-		    field: 'boss4',
-		    headerName: boss.name4 || t('damage__header__boss_4'),
-		    flex: 1,
-            minWidth: 50,
-			headerAlign: 'center',
-		    align: 'right',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-			valueGetter: (value, row) => value ? formatNumber(value) : 0,
-			renderCell: (params) => <Tooltip title={params.row.deck4}><span>{params.formattedValue}</span></Tooltip>,
-		  },
-		  {
-		    field: 'boss5',
-		    headerName: boss.name5 || t('damage__header__boss_5'),
-		    flex: 1,
-            minWidth: 50,
-			headerAlign: 'center',
-		    align: 'right',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-			valueGetter: (value, row) => value ? formatNumber(value) : 0,
-			renderCell: (params) => <Tooltip title={params.row.deck5}><span>{params.formattedValue}</span></Tooltip>,
-		  },
-		  {
-		    field: 'deck1',
-		    headerName: t('damage__header__deck_1'),
-		    flex: 1,
-            minWidth: 50,
-		    headerAlign: 'center',
-		    align: 'center',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-		  },
-		  {
-		    field: 'deck2',
-		    headerName: t('damage__header__deck_2'),
-		    flex: 1,
-            minWidth: 50,
-		    headerAlign: 'center',
-		    align: 'center',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-		  },
-		  {
-		    field: 'deck3',
-		    headerName: t('damage__header__deck_3'),
-		    flex: 1,
-            minWidth: 50,
-		    headerAlign: 'center',
-		    align: 'center',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-		  },
-		  {
-		    field: 'deck4',
-		    headerName: t('damage__header__deck_4'),
-		    flex: 1,
-            minWidth: 50,
-		    headerAlign: 'center',
-		    align: 'center',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-		  },
-		  {
-		    field: 'deck5',
-		    headerName: t('damage__header__deck_5'),
-		    flex: 1,
-            minWidth: 50,
-		    headerAlign: 'center',
-		    align: 'center',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-		  },
-		  {
-		    field: 'updatedAt',
-		    headerName: t('damage__header__updated_at'),
-		    flex: 1,
-            minWidth: 50,
-		    headerAlign: 'center',
-		    align: 'center',
-		    // editable: (value, row) => row.userId === userInfo.userId ? true : false,
-		  },
+			{
+				field: 'userId',
+				headerName: t('damage__header__user_id'),
+			},
+			{
+				field: 'nickname',
+				headerName: t('damage__header__nickname'),
+				flex: 1,
+				headerAlign: 'center',
+				align: 'center',
+				// valueGetter: (value, row) => value,
+				renderCell: (params) => <Tooltip title={
+					<div style={{ minWidth: '100px' }}>
+						<Typography variant={"h6"} textAlign={"left"}>『</Typography>
+						<Typography variant={"body1"}>{parse((params.row.memo || "").replace(/\n/g, "<br/>"))}</Typography>
+						<Typography variant={"h6"} textAlign={"right"}>』</Typography>
+					</div>
+				}>{params.formattedValue}</Tooltip>,
+			},
+			{
+				field: 'level',
+				headerName: t('damage__header__level'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'center',
+			},
+			{
+				field: 'index',
+				headerName: t('damage__header__index'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'center',
+			},
+			{
+				field: 'boss1',
+				headerName: boss.name1 || t('damage__header__boss_1'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'right',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+				valueGetter: (value, row) => value ? formatNumber(value) : 0,
+				renderCell: (params) => <Tooltip title={<Typography variant={"body2"}>{params.row.deck1}</Typography>}>{params.formattedValue}</Tooltip>,
+			},
+			{
+				field: 'boss2',
+				headerName: boss.name2 || t('damage__header__boss_2'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'right',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+				valueGetter: (value, row) => value ? formatNumber(value) : 0,
+				renderCell: (params) => <Tooltip title={<Typography variant={"body2"}>{params.row.deck2}</Typography>}>{params.formattedValue}</Tooltip>,
+			},
+			{
+				field: 'boss3',
+				headerName: boss.name3 || t('damage__header__boss_3'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'right',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+				valueGetter: (value, row) => value ? formatNumber(value) : 0,
+				renderCell: (params) => <Tooltip title={<Typography variant={"body2"}>{params.row.deck3}</Typography>}>{params.formattedValue}</Tooltip>,
+			},
+			{
+				field: 'boss4',
+				headerName: boss.name4 || t('damage__header__boss_4'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'right',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+				valueGetter: (value, row) => value ? formatNumber(value) : 0,
+				renderCell: (params) => <Tooltip title={<Typography variant={"body2"}>{params.row.deck4}</Typography>}>{params.formattedValue}</Tooltip>,
+			},
+			{
+				field: 'boss5',
+				headerName: boss.name5 || t('damage__header__boss_5'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'right',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+				valueGetter: (value, row) => value ? formatNumber(value) : 0,
+				renderCell: (params) => <Tooltip title={<Typography variant={"body2"}>{params.row.deck5}</Typography>}>{params.formattedValue}</Tooltip>,
+			},
+			{
+				field: 'deck1',
+				headerName: t('damage__header__deck_1'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'center',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+			},
+			{
+				field: 'deck2',
+				headerName: t('damage__header__deck_2'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'center',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+			},
+			{
+				field: 'deck3',
+				headerName: t('damage__header__deck_3'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'center',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+			},
+			{
+				field: 'deck4',
+				headerName: t('damage__header__deck_4'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'center',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+			},
+			{
+				field: 'deck5',
+				headerName: t('damage__header__deck_5'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'center',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+			},
+			{
+				field: 'updatedAt',
+				headerName: t('damage__header__updated_at'),
+				flex: 1,
+				minWidth: 50,
+				headerAlign: 'center',
+				align: 'center',
+				// editable: (value, row) => row.userId === userInfo.userId ? true : false,
+			},
 		];
 
     	if (currentTheme.isMobile) {
-			return initialColumns.filter(column => ![ 'userId'
+			return initialColumns.filter(column => ![ 'userId', 'level'
 													,'deck1', 'deck2', 'deck3', 'deck4', 'deck5', 'updatedAt' ].includes(column.field)
 			)
     	} else {
-			return initialColumns.filter(column => ![ 'userId'
+			return initialColumns.filter(column => ![ 'userId', 'level'
 													,'deck1', 'deck2', 'deck3', 'deck4', 'deck5', 'updatedAt' ].includes(column.field)
 			)
 		}
 	},[rows, t, currentTheme.isMobile])
+
+	/**
+	 * Alert 기능 정의
+	 */
+	const [alertText, setAlertText] = React.useState('');
+	const [isAlertVisible, setIsAlertVisible] = React.useState(false);
+
+	const showAlert = (message) => {
+		setAlertText(message);
+		setIsAlertVisible(true);
+	};
+
+	const handleAlertClose = () => {
+		setIsAlertVisible(false);
+	};
 
 	return(
 		<section id="homeSection">
@@ -581,10 +579,10 @@ const Home = () => {
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual3")}</Typography>
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual4")}</Typography>
 								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual5")}</Typography>
-								<Typography variant="caption" sx={{ pl: 1 }} color='primary'>{t("damage__user_manual5c1")}</Typography><br/>
-								<Typography variant="caption" sx={{ pl: 1 }} color='primary'>{t("damage__user_manual5c2")}</Typography>
-								<Typography variant="body1" sx={{ pl: 1 }}>{t("damage__user_manual6")}</Typography>
-								{isAdmin && <Typography variant="body2" sx={{ pl: 1, mt: 1, color: "orangered", backgroundColor: "black" }}>{t("damage__user_manual_warning")}</Typography>}
+								{isAdmin && <>
+									<Typography variant="body1" sx={{ pl: 1 }} color='warning'>{t("damage__user_manual_manager")}</Typography>
+									<Typography variant="body2" sx={{ pl: 1 }} color='warning'>{t("damage__user_manual_warning")}</Typography>
+								</>}
 
 							</Collapse>
 						</List>
@@ -594,50 +592,51 @@ const Home = () => {
 						<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
 							<Box display="flex" alignItems="center">
 								{ isLogin && isAdmin &&
-								<Button component={Link} color='warning' onClick={handleBossDelete} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
+								<Button color='warning' variant="contained" onClick={handleBossDelete} startIcon={<RestartAltIcon />}>{t('damage__title__boss_information')} {t('btn__reset')}</Button>
 								}
 							</Box>
 							{ isLogin && isAdmin &&
-							<Button component={Link} color='primary' onClick={handleBossGet} startIcon={<UpgradeIcon />}>{t('damage__title__boss_information')} {t('btn__update')}</Button>
+							<Button color='primary' variant="contained" onClick={handleBossDialogOpen} startIcon={<UpgradeIcon />}>{t('damage__title__boss_information')} {t('btn__update')}</Button>
 							}
 						</Box>
 						<List component="div" disablePadding sx={{ width: '100%' }}>
 							<ListItemButton onClick={handleCollapseBoss}>
-								<ListItemText primary={t("damage__title__boss_information")} secondary={t("damage__header__hard") + " " + t("damage__header__level") + ": " + boss.level} />
 								{collapseBoss ? <ExpandLess /> : <ExpandMore />}
+								<ListItemText primary={t("damage__title__boss_information")} />
+								<Typography variant={"subtitle1"}>『{t('damage__header__level')} {bossLevelRef.current}』</Typography>
 							</ListItemButton>
 							<Collapse in={collapseBoss} timeout="auto" unmountOnExit>
 								<List component="div" disablePadding>
 									{ boss.hp1 > 0 &&
-									<ListItemButton sx={{ pl: 4 }} onClick={suggestPlayer} data-boss="1">
+									<ListItemButton sx={{ pl: 4 }} data-boss='boss1' onClick={handleRaid}>
 										<ListItemIcon>
 										<Filter1Icon />
 										</ListItemIcon>
 										<ListItemText primary={boss.name1} secondary={formatNumber(boss.hp1)} />
 									</ListItemButton>
 									} { boss.hp2 > 0 &&
-									<ListItemButton sx={{ pl: 4 }} onClick={suggestPlayer} data-boss="2">
+									<ListItemButton sx={{ pl: 4 }} data-boss='boss2' onClick={handleRaid}>
 										<ListItemIcon>
 										<Filter2Icon />
 										</ListItemIcon>
 										<ListItemText primary={boss.name2} secondary={formatNumber(boss.hp2)} />
 									</ListItemButton>
 									} { boss.hp3 > 0 &&
-									<ListItemButton sx={{ pl: 4 }} onClick={suggestPlayer} data-boss="3">
+									<ListItemButton sx={{ pl: 4 }} data-boss='boss3' onClick={handleRaid}>
 										<ListItemIcon>
 										<Filter3Icon />
 										</ListItemIcon>
 										<ListItemText primary={boss.name3} secondary={formatNumber(boss.hp3)} />
 									</ListItemButton>
 									} { boss.hp4 > 0 &&
-									<ListItemButton sx={{ pl: 4 }} onClick={suggestPlayer} data-boss="4">
+									<ListItemButton sx={{ pl: 4 }} data-boss='boss4' onClick={handleRaid}>
 										<ListItemIcon>
 										<Filter4Icon />
 										</ListItemIcon>
 										<ListItemText primary={boss.name4} secondary={formatNumber(boss.hp4)} />
 									</ListItemButton>
 									} { boss.hp5 > 0 &&
-									<ListItemButton sx={{ pl: 4 }} onClick={suggestPlayer} data-boss="5">
+									<ListItemButton sx={{ pl: 4 }} data-boss='boss5' onClick={handleRaid}>
 										<ListItemIcon>
 										<Filter5Icon />
 										</ListItemIcon>
@@ -647,6 +646,21 @@ const Home = () => {
 								</List>
 							</Collapse>
 						</List>
+
+						<Box display="flex" alignItems="center" justifyContent="space-between" mt={2}>
+							<ToggleButtonGroup
+								color="primary"
+								value={bossLevel}
+								exclusive
+								onChange={handleBossLevel}
+								aria-label="Boss Level"
+								fullWidth={true}
+							>
+								{bossLevels.map((lev, index) => (
+									<ToggleButton value={lev} key={lev}>{lev}</ToggleButton>
+								))}
+							</ToggleButtonGroup>
+						</Box>
 					</Grid>
 				</Grid>
 			</div>
@@ -656,46 +670,34 @@ const Home = () => {
 					<Grid item md={12} sm={12} xs={12}>
 						<Box className="item">
 							<Box display="flex" alignItems="center" justifyContent="space-between">
-								<Box display="flex" alignItems="center">
+								<Box display="flex" alignItems="center" pb={1}>
 									{ isLogin && isAdmin &&
-									<Button component={Link} color='warning' onClick={handleSimulationReset} startIcon={<RestartAltIcon />}>{t('search__condition__union')} {t('damage__simulation_result')} {t('btn__reset')}</Button>
+									<Button variant="contained" color='warning' onClick={handleSimulationReset} startIcon={<RestartAltIcon />}>{t('search__condition__union')} {t('damage__simulation_result')} {t('btn__reset')}</Button>
 									}
       							</Box>
       							{ isLogin &&
-								<Button component={Link} color='primary' onClick={handleSimulationGet} startIcon={<ScoreIcon />}>{t('damage__my')} {t('damage__simulation_result')} {t('btn__update')}</Button>
+								<Button variant="contained" color='primary' onClick={handleSimulationDialogOpen} startIcon={<ScoreIcon />}>{t('damage__my')} {t('damage__simulation_result')} {t('btn__update')}</Button>
 								}
 							</Box>
 
-							<Box sx={{ height: '100%', width:'100%'}}>
+							<Box sx={{ minHeight: 350, height: '100%', width:'100%'}}>
 								<FilterSection
 									onFilterChange={handleFilterChange}
+									onClickReload={getScores}
 									rowfilters={rowfilters}
 								/>
 
 								<DataGrid
 									rows={rows}
 									columns={columns}
-									initialState={{
-										pagination: {
-											paginationModel: {
-												pageSize: 10,
-											},
-										},
-									}}
-									pageSizeOptions={[10]}
 							        slots={{
 							          noRowsOverlay: NoDataGrid,
 							        }}
 									checkboxSelection
-									rowSelectionModel={suggestedPlayers}
-									onRowSelectionModelChange={suggestPlayerManual}
+									onRowSelectionModelChange={sumScores}
 									loading={loading}
+									hideFooterPagination={true}
 								/>
-								<style>{`
-								.suggested-row {
-									background-color: rgba(25, 118, 210, 0.66); /* Light blue */
-								}
-								`}</style>
 								</Box>
 						</Box>
 					</Grid>
@@ -707,7 +709,7 @@ const Home = () => {
 						<Table border={1}>
 							<TableHead sx={{backgroundColor: currentTheme.palette.background.default }}>
 								<TableRow>
-									<TableCell sx={{textAlign:'left'}}>{t('damage__header__remaining')} HP</TableCell>
+									<TableCell sx={{textAlign:'center'}}><CalculateIcon /></TableCell>
 									<TableCell sx={{textAlign:'right'}}>{boss.name1 || t('damage__header__boss_1')}</TableCell>
 									<TableCell sx={{textAlign:'right'}}>{boss.name2 || t('damage__header__boss_2')}</TableCell>
 									<TableCell sx={{textAlign:'right'}}>{boss.name3 || t('damage__header__boss_3')}</TableCell>
@@ -717,15 +719,12 @@ const Home = () => {
 							</TableHead>
 							<TableBody>
 								<TableRow>
-									<TableCell sx={{textAlign:'left'}}>
-										{t('damage__header__overheat')}
-										&nbsp;({(rowfilters.overheat > 2 ? (rowfilters.overheat / 100000000).toFixed(1) + "억" : (rowfilters.overheat * 100 - 100).toFixed(0) + "%")})
-									</TableCell>
-									<TableCell sx={{textAlign:'right', color: currentBossHp.hp1 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp1)}</TableCell>
-									<TableCell sx={{textAlign:'right', color: currentBossHp.hp2 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp2)}</TableCell>
-									<TableCell sx={{textAlign:'right', color: currentBossHp.hp3 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp3)}</TableCell>
-									<TableCell sx={{textAlign:'right', color: currentBossHp.hp4 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp4)}</TableCell>
-									<TableCell sx={{textAlign:'right', color: currentBossHp.hp5 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(currentBossHp.hp5)}</TableCell>
+									<TableCell sx={{textAlign:'center'}}>{t('damage__header__total')}</TableCell>
+									<TableCell sx={{textAlign:'right', color: scoreSum.hp1 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(scoreSum.hp1)}</TableCell>
+									<TableCell sx={{textAlign:'right', color: scoreSum.hp2 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(scoreSum.hp2)}</TableCell>
+									<TableCell sx={{textAlign:'right', color: scoreSum.hp3 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(scoreSum.hp3)}</TableCell>
+									<TableCell sx={{textAlign:'right', color: scoreSum.hp4 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(scoreSum.hp4)}</TableCell>
+									<TableCell sx={{textAlign:'right', color: scoreSum.hp5 < 0 ? 'orangered' : 'lightgray' }}>{formatNumber(scoreSum.hp5)}</TableCell>
 								</TableRow>
 							</TableBody>
 						</Table>
@@ -743,49 +742,76 @@ const Home = () => {
 			  maxWidth="xs"
 			>
 				<DialogTitle id="alert-dialog-title">
-					{t('damage__my')} {t('damage__simulation_result')}
+					<Box display="flex" justifyContent="space-between" alignItems="center">
+						<Typography variant={"h6"} color={"primary"}>{t('damage__my')} {t('damage__simulation_result')}
+							<Typography variant={"subtitle1"}>『{t('damage__header__level')} {bossLevelRef.current}』</Typography>
+						</Typography>
+						<FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+							<InputLabel>{t('damage__header__index')}</InputLabel>
+							<NativeSelect
+								name="index"
+								value={simulationIndexRef.current}
+								onChange={handleSimulationIndexChange}
+							>
+								{simulationIndexes.map((idx, index) => (
+									<option value={idx} key={index}>{idx}</option>
+								))}
+							</NativeSelect>
+						</FormControl>
+					</Box>
 				</DialogTitle>
 				<DialogContent>
 					<DialogContentText item xs={8} md={12} sm={12} className="edit-form">
 						<Divider textAlign="right">{boss.name1 || 'boss 1'}</Divider>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="deck1" label={t('damage__header__deck_1')} type="text" value={simulation.deck1} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="deck1" label={t('damage__simulation_deck')} type="text" value={simulation.deck1} onChange={handleSimulationChange}/>
 						</FormControl>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="boss1" label={t('damage__header__boss_1')} type="text" value={simulation.boss1} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="boss1" label={t('damage__simulation_result')} type="text" value={simulation.boss1} onChange={handleSimulationChange}/>
 						</FormControl>
 
 						<Divider textAlign="right">{boss.name2 || 'boss 2'}</Divider>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="deck2" label={t('damage__header__deck_2')} type="text" value={simulation.deck2} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="deck2" label={t('damage__simulation_deck')} type="text" value={simulation.deck2} onChange={handleSimulationChange}/>
 						</FormControl>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="boss2" label={t('damage__header__boss_2')} type="text" value={simulation.boss2} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="boss2" label={t('damage__simulation_result')} type="text" value={simulation.boss2} onChange={handleSimulationChange}/>
 						</FormControl>
 
 						<Divider textAlign="right">{boss.name3 || 'boss 3'}</Divider>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="deck3" label={t('damage__header__deck_3')} type="text" value={simulation.deck3} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="deck3" label={t('damage__simulation_deck')} type="text" value={simulation.deck3} onChange={handleSimulationChange}/>
 						</FormControl>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="boss3" label={t('damage__header__boss_3')} type="text" value={simulation.boss3} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="boss3" label={t('damage__simulation_result')} type="text" value={simulation.boss3} onChange={handleSimulationChange}/>
 						</FormControl>
 
 						<Divider textAlign="right">{boss.name4 || 'boss 4'}</Divider>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="deck4" label={t('damage__header__deck_4')} type="text" value={simulation.deck4} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="deck4" label={t('damage__simulation_deck')} type="text" value={simulation.deck4} onChange={handleSimulationChange}/>
 						</FormControl>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="boss4" label={t('damage__header__boss_4')} type="text" value={simulation.boss4} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="boss4" label={t('damage__simulation_result')} type="text" value={simulation.boss4} onChange={handleSimulationChange}/>
 						</FormControl>
 
 						<Divider textAlign="right">{boss.name5 || 'boss 5'}</Divider>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="deck5" label={t('damage__header__deck_5')} type="text" value={simulation.deck5} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="deck5" label={t('damage__simulation_deck')} type="text" value={simulation.deck5} onChange={handleSimulationChange}/>
 						</FormControl>
-						<FormControl fullWidth sx={{ m: 1 }}>
-							<TextField name="boss5" label={t('damage__header__boss_5')} type="text" value={simulation.boss5} onChange={handleSimulationChange}/>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField name="boss5" label={t('damage__simulation_result')} type="text" value={simulation.boss5} onChange={handleSimulationChange}/>
 						</FormControl>
+
+						<Divider textAlign="right">Memo</Divider>
+						<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
+							<TextField
+								name="memo"
+								multiline
+								rows={4}
+								value={simulation.memo} onChange={handleSimulationChange}
+							/>
+						</FormControl>
+
 
 					</DialogContentText>
 				</DialogContent>
@@ -807,56 +833,59 @@ const Home = () => {
 			>
 				<DialogTitle id="alert-dialog-title">
 					<Box display="flex" justifyContent="space-between" alignItems="center">
-					{t("damage__title__boss_information")}
-					<FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
-						<InputLabel>Hard Level</InputLabel>
-							<NativeSelect
-							value={boss.level}
-							onChange={handleBossChange}
-							>
-							<option value={'1'}>1</option>
-						</NativeSelect>
-					</FormControl>
+						<Typography variant={"h6"} color={"primary"}>{t("damage__title__boss_information")}</Typography>
+						<ToggleButtonGroup
+							color="primary"
+							value={bossLevel}
+							exclusive
+							onChange={handleBossLevel}
+							aria-label="Boss Level"
+							// fullWidth={true}
+						>
+							{bossLevels.map((lev, index) => (
+								<ToggleButton value={lev} key={lev} style={{paddingLeft: '20px', paddingRight: '20px', }}>{lev}</ToggleButton>
+							))}
+						</ToggleButtonGroup>
 					</Box>
 				</DialogTitle>
 				<DialogContent>
 					<Divider textAlign="right">boss 1</Divider>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="name1" label={t('damage__header__boss_name')} type="text" value={boss.name1} onChange={handleBossChange}/>
 					</FormControl>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="hp1" label={t('damage__header__boss_hp')} type="number" value={boss.hp1} onChange={handleBossChange}/>
 					</FormControl>
 
 					<Divider textAlign="right">boss 2</Divider>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="name2" label={t('damage__header__boss_name')} type="text" value={boss.name2} onChange={handleBossChange}/>
 					</FormControl>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="hp2" label={t('damage__header__boss_hp')} type="number" value={boss.hp2} onChange={handleBossChange}/>
 					</FormControl>
 
 					<Divider textAlign="right">boss 3</Divider>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="name3" label={t('damage__header__boss_name')} type="text" value={boss.name3} onChange={handleBossChange}/>
 					</FormControl>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="hp3" label={t('damage__header__boss_hp')} type="number" value={boss.hp3} onChange={handleBossChange}/>
 					</FormControl>
 
 					<Divider textAlign="right">boss 4</Divider>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="name4" label={t('damage__header__boss_name')} type="text" value={boss.name4} onChange={handleBossChange}/>
 					</FormControl>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="hp4" label={t('damage__header__boss_hp')} type="number" value={boss.hp4} onChange={handleBossChange}/>
 					</FormControl>
 
 					<Divider textAlign="right">boss 5</Divider>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="name5" label={t('damage__header__boss_name')} type="text" value={boss.name5} onChange={handleBossChange}/>
 					</FormControl>
-					<FormControl fullWidth sx={{ m: 1 }}>
+					<FormControl fullWidth sx={{ mt: 0.5, mb: 0.5 }}>
 						<TextField name="hp5" label={t('damage__header__boss_hp')} type="number" value={boss.hp5} onChange={handleBossChange}/>
 					</FormControl>
 

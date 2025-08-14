@@ -24,8 +24,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import TuneIcon from '@mui/icons-material/Tune';
 import AssignmentIndIcon from "@mui/icons-material/AssignmentInd";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-// import LoginIcon from '@mui/icons-material/Login';	
 import LogoutIcon from '@mui/icons-material/Logout';
+
+import GroupsIcon from '@mui/icons-material/Groups';
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip';
 // import HomeIcon from '@mui/icons-material/Home';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -39,7 +40,7 @@ import pocketid from "@assets/imgs/pocketid.png";
 
 const Header = ({handleChange, current, currentImg}) => {
 	const currentTheme = useTheme();
-	const { userInfo, isLogin } = useUser();
+	const { userInfo, isLogin, isAdmin } = useUser();
 	const { t, i18n  } = useTranslation();
 
 	const Calendar = styled(Paper)(() => ({
@@ -50,7 +51,8 @@ const Header = ({handleChange, current, currentImg}) => {
 	}));
 
 	const mainMenu = [
-		{ index:1, link:"/privacy", icon:<PrivacyTipIcon />, name:t("menu__privacy") },
+		{ index:1, link:"/members", icon:<GroupsIcon />, name:t("search__condition__union") + " " + t("search__condition__member"), adminOnly: true },
+		{ index:2, link:"/privacy", icon:<PrivacyTipIcon />, name:t("menu__privacy"), adminOnly: false },
 	]
 
 	// user popup
@@ -149,7 +151,9 @@ const Header = ({handleChange, current, currentImg}) => {
 					{/* 메뉴 목록 */}
 					<Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex', lm: 'flex' }, justifyContent: 'center' }}>
 					{mainMenu.map((menu, index) => (
-						<Button key={index} color='inherit' component={Link} to={menu.link} startIcon={menu.icon}>{menu.name}</Button>
+						(!menu.adminOnly || isAdmin) &&
+						<Button key={index} color='inherit' component={Link} to={menu.link}
+											startIcon={menu.icon}>{menu.name}</Button>
 					))}
 					</Box>
 
