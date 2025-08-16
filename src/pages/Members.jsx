@@ -248,23 +248,40 @@ const Members = () => {
 		const rowId = parseInt(data.id);
 		const nickname = (data.nickname || "").trim();
 
-
-		if(!nickname) {
-			alert(t('user__nickname') + t('alert__required'));
-		} else {
-			const targetRow = rows.find(row => rowId === row.id);
-			targetRow.nickname = nickname;
-
-			gateway.post(`/api/v1/members`, targetRow)
-				.then((response) =>  {
-						getMembers();
-						showAlert(t('alert__saved'));
-					}
-				);
+		if(!nickname){
+			showAlert(t('user__nickname') + t('alert__required'), 'error');
+			return;
 		}
+
+		const isDuplicated = rawData.some(user => user.nickname === nickname);
+		if(isDuplicated){
+			showAlert(t('user__nickname') + t('alert__duplicated'), 'error');
+			return;
+		}
+
+		const targetRow = rows.find(row => rowId === row.id);
+		targetRow.nickname = nickname;
+
+		gateway.post(`/api/v1/members`, targetRow)
+			.then((response) =>  {
+					getMembers();
+					showAlert(t('alert__saved'));
+				}
+			);
 	};
 
 	const handleMembersSave = async (params) => {
+		if(!params.nickname){
+			showAlert(t('user__nickname') + t('alert__required'), 'error');
+			return;
+		}
+
+		const isDuplicated = rawData.some(user => user.nickname === params.nickname);
+		if(isDuplicated){
+			showAlert(t('user__nickname') + t('alert__duplicated'), 'error');
+			return;
+		}
+
 		gateway.post(`/api/v1/members`, params)
 			.then((response) =>  {
 					getMembers();
